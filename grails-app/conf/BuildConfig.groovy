@@ -3,17 +3,10 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 
 grails.project.fork = [
-    // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
-    //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
-
-    // configure settings for the test-app JVM, uses the daemon by default
-    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
-    // configure settings for the run-app JVM
-    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
-    // configure settings for the run-war JVM
-    war: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
-    // configure settings for the Console UI JVM
-    console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
+        test   : false,
+        run    : false,
+        war    : false,
+        console: false
 ]
 
 grails.project.dependency.resolver = "maven" // or ivy
@@ -36,13 +29,24 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-        // runtime 'mysql:mysql-connector-java:5.1.27'
+        runtime('mysql:mysql-connector-java:5.1.27') {
+            export = false
+        }
+        compile "org.jadira.usertype:usertype.jodatime:2.0.1"
+
     }
 
     plugins {
-        build(":release:3.0.1",
-              ":rest-client-builder:1.0.3") {
+        build(":release:3.0.1", ":rest-client-builder:1.0.3") {
             export = false
         }
+
+        build(':tomcat:7.0.55') {
+            export = false
+        }
+
+        // hibernate is needed just for joda-time persistence, we either need to remove joda-time or find a better way to work around this
+        compile(':hibernate4:4.3.6.1')
+        compile ":joda-time:1.5"
     }
 }
