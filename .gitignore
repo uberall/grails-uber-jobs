@@ -31,3 +31,9 @@
 
 # "temporary" build files
 /target
+
+
+# ide files
+.idea
+*.iml
+.DS_STORE
