@@ -37,3 +37,6 @@
 .idea
 *.iml
 .DS_STORE
+
+# files that one should not commit
+grails-app/conf/DataSource.groovy
