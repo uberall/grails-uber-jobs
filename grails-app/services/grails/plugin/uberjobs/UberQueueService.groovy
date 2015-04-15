@@ -5,6 +5,14 @@ import grails.transaction.Transactional
 @Transactional
 class UberQueueService extends AbstractUberService {
 
+    def findOrCreate(String name){
+        def result = UberQueue.findByName(name)
+        if(!result){
+            result = create(name)
+        }
+        result
+    }
+
     def create(String name) {
         new UberQueue(name: name, enabled: true).save(failOnError: true)
     }

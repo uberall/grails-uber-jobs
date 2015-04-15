@@ -8,6 +8,11 @@ import org.joda.time.DateTime
 class UberWorkerMeta {
 
     /**
+     * The queues this worker is allowed to work on
+     */
+    static hasMany = [queues: UberQueue]
+
+    /**
      * the hostname this worker is working on
      */
     String hostname

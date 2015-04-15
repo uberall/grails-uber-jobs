@@ -8,4 +8,8 @@ abstract class AbstractUberService {
         grailsApplication.config.grails.uberjobs
     }
 
+    String getHostName() {
+        InetAddress.getLocalHost().getHostName()
+    }
+
 }

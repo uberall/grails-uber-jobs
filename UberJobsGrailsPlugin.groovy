@@ -102,6 +102,7 @@ Brief summary/description of the plugin.
     def doWithApplicationContext = { ctx ->
         // AFTER SPRING CONTEXT IS INITIALIZED
         ctx.uberJobsService.init()
+        ctx.uberWorkerService.createWorkersFromConfig()
     }
 
     def onChange = { event ->

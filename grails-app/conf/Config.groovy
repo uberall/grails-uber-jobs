@@ -13,6 +13,18 @@ grails {
             update = true // enable updating TriggerMeta on application startup
             cleanup = true // enable pruning TriggerMeta of Triggers that are not found in code anymore
         }
+        workers {
+            // generic worker pool
+            genericPool {
+                workers = 3
+                queueNames = "testJobQueue"
+            }
+            // only working on jobs that use a browser; 1 worker ensures that we don't try to create 2 browsers at the same time.
+            usingBrowserPool {
+                workers = -1
+                queueNames = ['testJobQueue', 'scheduledTestQueue']
+            }
+        }
     }
 }
 

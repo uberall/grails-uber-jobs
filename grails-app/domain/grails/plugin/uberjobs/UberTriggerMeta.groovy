@@ -46,6 +46,7 @@ class UberTriggerMeta {
         cronExpression nullable: false
         queueName nullable: false
         job nullable: false
+        lastFired nullabe: true
     }
 
     static mapping = {

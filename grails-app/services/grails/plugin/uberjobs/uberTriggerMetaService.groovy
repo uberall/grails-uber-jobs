@@ -1,6 +1,7 @@
 package grails.plugin.uberjobs
 
 import grails.transaction.Transactional
+import org.joda.time.DateTime
 
 @Transactional
 class UberTriggerMetaService extends AbstractUberService {
@@ -11,7 +12,8 @@ class UberTriggerMetaService extends AbstractUberService {
                 job: job,
                 queueName: queueName,
                 cronExpression: cronExpression,
-                enabled: enabled
+                enabled: enabled,
+                lastFired: DateTime.now()
         )
         triggerMeta.save(failOnError: true)
     }
