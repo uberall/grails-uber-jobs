@@ -47,6 +47,12 @@ class UberWorkerMeta {
      * Status information for workers
      */
     enum Status {
+
+        /**
+         * Worker is currently starting
+         */
+        STARTING,
+
         /**
          * Worker is doing nothing as no work has to be done
          */

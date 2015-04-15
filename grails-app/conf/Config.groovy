@@ -14,6 +14,9 @@ grails {
             cleanup = true // enable pruning TriggerMeta of Triggers that are not found in code anymore
         }
         workers {
+            update = true // enable updating of WorkerMeta on application startup
+            cleanup = false // enable pruning of WorkerMeta that is not in config anymore
+            restart = true // enable starting from WorkerMeta that is not in config but in DB
             // generic worker pool
             genericPool {
                 workers = 3

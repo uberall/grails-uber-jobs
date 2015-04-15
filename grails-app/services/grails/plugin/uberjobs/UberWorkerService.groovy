@@ -11,6 +11,9 @@ class UberWorkerService extends AbstractUberService {
     def createWorkersFromConfig() {
         // iterate over workers configurations
         config.workers.each { poolName, config ->
+            if (poolName in ['update', 'cleanup', 'restart']) {
+                return
+            }
             List queueNames
             // check queue configuration, should be a list, a single string or a closure that is returning a list
             if (config.queueNames in List) {
@@ -25,7 +28,7 @@ class UberWorkerService extends AbstractUberService {
                 throw new RuntimeException("queueNames of $poolName must be a List, Closure (returning a list) or a String. ${config.queueNames.class.simpleName} is not allowed!")
             }
             def queues = []
-            queueNames.each { String name
+            queueNames.each { name ->
                 queues << uberQueueService.findOrCreate(name)
             }
             // start the appropiate amount of workers
@@ -35,20 +38,15 @@ class UberWorkerService extends AbstractUberService {
         }
     }
 
-    def start(poolName, index, queues){
+    def start(String poolName, int index, List<UberQueueMeta> queues) {
         UberWorkerMeta workerMeta = UberWorkerMeta.findByPoolNameAndHostnameAndIndex(poolName, hostName, index)
-        if(!workerMeta){
-            workerMeta = createWorker(poolName, index, queues)
-        } else if(config.workers.update){
+        if (!workerMeta) {
+            workerMeta = uberWorkerMetaService.create(poolName, index, queues)
+        } else if (config.workers.update) {
             // TODO: UPDATE
         }
         //TODO: start the actual Thread
     }
-
-    def createWorker(String poolName, int index, List queues) {
-        uberWorkerMetaService.create(poolName, index, queues)
-    }
-
 
     String getName(poolName, index) {
         "$hostName-$poolName-$index"
