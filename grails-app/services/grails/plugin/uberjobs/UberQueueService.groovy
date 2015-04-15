@@ -3,7 +3,7 @@ package grails.plugin.uberjobs
 import grails.transaction.Transactional
 
 @Transactional
-class UberQueueService {
+class UberQueueService extends AbstractUberService {
 
     def create(String name) {
         new UberQueue(name: name, enabled: true).save(failOnError: true)
