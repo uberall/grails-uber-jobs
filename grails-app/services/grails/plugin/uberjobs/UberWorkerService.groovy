@@ -6,6 +6,7 @@ import grails.transaction.Transactional
 class UberWorkerService extends AbstractUberService {
 
     def uberQueueService
+    def uberWorkerMetaService
 
     def createWorkersFromConfig() {
         config.workers.each { poolName, config ->
@@ -30,8 +31,11 @@ class UberWorkerService extends AbstractUberService {
     def start(poolName, index, queueNames){
         UberWorkerMeta workerMeta = UberWorkerMeta.findByPoolNameAndHostnameAndIndex(poolName, hostName, index)
         if(!workerMeta){
-
+            workerMeta = createWorker(poolName, index, queueNames)
+        } else if(config.workers.update){
+            // TODO: UPDATE
         }
+        //TODO: start the actual Thread
     }
 
     def createWorker(String poolName, int index, List queueNames) {
@@ -39,7 +43,7 @@ class UberWorkerService extends AbstractUberService {
         queueNames.each { String name
             queues << uberQueueService.findOrCreate(name)
         }
-        true
+        uberWorkerMetaService.create(poolName, index, queues)
     }
 
 
