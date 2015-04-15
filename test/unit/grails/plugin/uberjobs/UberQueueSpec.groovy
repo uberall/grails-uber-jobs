@@ -6,8 +6,8 @@ import spock.lang.Specification
 /**
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
-@TestFor(TriggerMeta)
-class TriggerMetaSpec extends Specification {
+@TestFor(UberQueue)
+class UberQueueSpec extends Specification {
 
     def setup() {
     }

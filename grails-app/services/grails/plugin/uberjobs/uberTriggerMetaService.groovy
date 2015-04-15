@@ -3,10 +3,10 @@ package grails.plugin.uberjobs
 import grails.transaction.Transactional
 
 @Transactional
-class TriggerMetaService {
+class UberTriggerMetaService {
 
-    def create(String name, JobMeta job, String cronExpression, String queueName, boolean enabled) {
-        TriggerMeta triggerMeta = new TriggerMeta(
+    def create(String name, UberJobMeta job, String cronExpression, String queueName, boolean enabled) {
+        UberTriggerMeta triggerMeta = new UberTriggerMeta(
                 name: name,
                 job: job,
                 queueName: queueName,
@@ -16,9 +16,9 @@ class TriggerMetaService {
         triggerMeta.save(failOnError: true)
     }
 
-    def update(TriggerMeta triggerMeta, Map updateParams){
-        TriggerMeta.withNewTransaction {
-            def locked = TriggerMeta.lock(triggerMeta.id)
+    def update(UberTriggerMeta triggerMeta, Map updateParams){
+        UberTriggerMeta.withNewTransaction {
+            def locked = UberTriggerMeta.lock(triggerMeta.id)
             if(updateParams.cronExpression) {
                 locked.cronExpression = updateParams.cronExpression
             }
@@ -31,11 +31,11 @@ class TriggerMetaService {
         }
     }
 
-    def disable(TriggerMeta triggerMeta) {
+    def disable(UberTriggerMeta triggerMeta) {
         update(triggerMeta, [enabled: false])
     }
 
-    def enable(TriggerMeta triggerMeta){
+    def enable(UberTriggerMeta triggerMeta){
         update(triggerMeta, [enabled: true])
     }
 }

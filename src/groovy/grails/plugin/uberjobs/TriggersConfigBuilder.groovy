@@ -1,7 +1,4 @@
 package grails.plugin.uberjobs
-
-import org.joda.time.DateTimeZone
-
 /**
  * Source is mainly taken from the original jesque plugin for grails
  * https://github.com/michaelcameron/grails-jesque/blob/master/grails-jesque/src/groovy/grails/plugin/jesque/TriggersConfigBuilder.groovy
@@ -50,7 +47,7 @@ class TriggersConfigBuilder extends BuilderSupport {
 
         // set trigger queue (if not specified, we simply use the jobs queue name
         if (triggerAttributes[GrailsUberJobClassProperty.TRIGGER_QUEUE_NAME] == null) {
-            triggerAttributes[GrailsUberJobClassProperty.TRIGGER_QUEUE_NAME] = jobClass.queueName
+            triggerAttributes[GrailsUberJobClassProperty.TRIGGER_QUEUE_NAME] = jobClass.defaultQueueName
         }
 
         // set attributes

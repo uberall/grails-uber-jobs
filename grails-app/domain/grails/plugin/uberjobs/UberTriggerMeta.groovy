@@ -3,9 +3,9 @@ package grails.plugin.uberjobs
 import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 import org.joda.time.DateTime
 
-class TriggerMeta {
+class UberTriggerMeta {
 
-    static belongsTo = [job: JobMeta]
+    static belongsTo = [job: UberJobMeta]
 
     String name
     String cronExpression

@@ -4,13 +4,14 @@ grails.project.groupId = 'grails.plugin.uberjobs'
 
 grails {
     uberjobs {
-        enabled = true
+        enabled = true // enable the plugin itself
         jobs {
-            update = true
-            cleanup = true
+            update = true // enable updating JobMeta on application startup
+            cleanup = true // enable pruning JobMeta of Jobs that are not found in code anymore
         }
         triggers {
-            update = true
+            update = true // enable updating TriggerMeta on application startup
+            cleanup = true // enable pruning TriggerMeta of Triggers that are not found in code anymore
         }
     }
 }

@@ -8,7 +8,7 @@ interface GrailsUberJobClass extends InjectableGrailsClass {
 
     public Map getTriggers();
 
-    public String getQueueName();
+    public String getDefaultQueueName();
 
     public boolean isSingletonJob();
 

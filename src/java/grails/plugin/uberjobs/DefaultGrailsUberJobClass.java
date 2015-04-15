@@ -38,7 +38,7 @@ class DefaultGrailsUberJobClass extends AbstractInjectableGrailsClass implements
     }
 
     @Override
-    public String getQueueName() {
+    public String getDefaultQueueName() {
         String queue = (String)getPropertyValue(GrailsUberJobClassProperty.QUEUE);
         if( queue == null )
             queue = getName() + "Queue";

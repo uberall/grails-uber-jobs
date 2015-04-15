@@ -3,9 +3,9 @@ package grails.plugin.uberjobs
 import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 import org.joda.time.DateTime
 
-class JobMeta {
+class UberJobMeta {
 
-    static hasMany = [triggers: TriggerMeta]
+    static hasMany = [triggers: UberTriggerMeta]
 
     // the job class that is associated to this JobMeta information
     String job
