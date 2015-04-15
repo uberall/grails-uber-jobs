@@ -51,7 +51,7 @@ class UberWorkerMeta implements UberApiResponseObject {
     }
 
     /**
-     * Status information for workers
+     * Represent the current state of a Worker
      */
     enum Status {
 
@@ -61,22 +61,22 @@ class UberWorkerMeta implements UberApiResponseObject {
         STARTING,
 
         /**
-         * Worker is doing nothing as no work has to be done
+         * Worker is currently idle
          */
                 IDLE,
 
         /**
-         * Worker is working
+         * Worker is currently working
          */
                 WORKING,
 
         /**
-         * Worker is paused
+         * Worker is currently paused
          */
                 PAUSED,
 
         /**
-         * Worker was killed
+         * Worker has been stopped
          */
                 STOPPED
     }
@@ -94,4 +94,5 @@ class UberWorkerMeta implements UberApiResponseObject {
                 queues     : queues.collect { [id: it.id, name: it.name] }
         ]
     }
+
 }

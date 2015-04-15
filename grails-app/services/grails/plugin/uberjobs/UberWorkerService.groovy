@@ -63,18 +63,84 @@ class UberWorkerService extends AbstractUberService {
         }
     }
 
-    def start(String poolName, int index, List<UberQueue> queues) {
+    UberWorker start(String poolName, int index, List<UberQueue> queues) {
         UberWorkerMeta workerMeta = UberWorkerMeta.findByPoolNameAndHostnameAndIndex(poolName, hostName, index)
         if (!workerMeta) {
             workerMeta = uberWorkerMetaService.create(poolName, index, queues)
         } else if (config.workers.update) {
             // TODO: UPDATE
         }
-        //TODO: start the actual Thread and add it to the list of workers
-        workerMeta
+
+        startWorker(queues, workerMeta)
     }
 
-    String getName(poolName, index) {
-        "$hostName-$poolName-$index"
+    /**
+     * Starts a worker that will poll the specified queues for jobs to process.
+     *
+     * @param queues the queues this worker should poll for jobs to process
+     * @return the started worker
+     */
+    UberWorker startWorker(List<UberQueue> queues, UberWorkerMeta workerMeta) {
+        log.info "Starting worker processing queues: ${queues}"
+
+        PollMode pollMode = grailsApplication.config.grails.uberjobs.pollMode
+        if (!pollMode) {
+            pollMode = PollMode.ROUND_ROBIN
+            log.info("no pollMode specified, using $pollMode")
+        }
+
+        // use custom worker class if specified
+        UberWorker worker
+        def customWorkerClass = grailsApplication.config.grails.uberjobs.custom.worker.clazz
+        if (customWorkerClass && customWorkerClass in UberWorker) {
+            worker = customWorkerClass.newInstance(queues)
+        } else {
+            if (customWorkerClass)
+                log.warn('The specified custom worker class does not extend UberWorker. Ignoring it')
+            worker = new UberWorker(queues, workerMeta, grailsApplication, pollMode)
+        }
+
+        // add custom listener if specified (not implemented yet)
+//        def customListenerClass = grailsApplication.config.grails.uberjobs.custom.listener.clazz
+//        if (customListenerClass && customListenerClass in UberWorkerListener) {
+//            worker.workerEventEmitter.addListener(customListenerClass.newInstance() as WorkerListener)
+//        } else if (customListenerClass) {
+//            log.warn('The specified custom listener class does not implement UberWorkerListener. Ignoring it')
+//        }
+
+        // add custom job throwable handler if specified
+        def customJobThrowableHandler = grailsApplication.config.grails.uberjobs.custom.jobThrowableHandler.clazz
+        if (customJobThrowableHandler && customJobThrowableHandler in JobThrowableHandler) {
+            worker.jobThrowableHandler = customJobThrowableHandler.newInstance() as JobThrowableHandler
+        } else if (customJobThrowableHandler) {
+            log.warn('The specified custom job throwable handler class does not implement JobThrowableHandler. Ignoring it')
+        }
+
+        // skip persistence if specified (not yet implemented - currently all workers support persistence)
+//        if (!grailsApplication.config.grails.uberjobs.skipPersistence) {
+//            log.debug("Enabling Persistence for all Jobs")
+//            def autoFlush = grailsApplication.config.grails.uberjobs.autoFlush ?: true
+//            def workerPersistenceListener = new WorkerPersistenceListener(persistenceInterceptor, autoFlush)
+//            worker.workerEventEmitter.addListener(workerPersistenceListener, WorkerEvent.JOB_EXECUTE, WorkerEvent.JOB_SUCCESS, WorkerEvent.JOB_FAILURE)
+//        }
+
+        // enable monitoring if specified (not yet implemented)
+//        boolean monitoring = grailsApplication.config.grails.uberjobs.monitoring as boolean
+//        if (monitoring) {
+//            log.debug("Enabling Monitoring for all Jobs")
+//            def workerMonitorListener = new WorkerMonitorListener(this)
+//            worker.workerEventEmitter.addListener(workerMonitorListener, WorkerEvent.JOB_EXECUTE, WorkerEvent.JOB_SUCCESS, WorkerEvent.JOB_FAILURE)
+//        }
+
+        // add the worker to the list of known workers
+        WORKERS.add(worker)
+
+        // start the actual worker thread
+        String workerName = worker.getName()
+        Thread workerThread = new Thread(worker, workerName)
+        workerThread.start()
+
+        worker
     }
+
 }

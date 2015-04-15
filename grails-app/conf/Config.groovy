@@ -1,3 +1,5 @@
+import grails.plugin.uberjobs.PollMode
+
 // configuration for plugin testing - will not be included in the plugin zip
 
 grails.project.groupId = 'grails.plugin.uberjobs'
@@ -6,6 +8,7 @@ grails {
     uberjobs {
         enabled = true // enable the plugin itself
         waitForJobsOnShutdown = true // whether or not wait for jobs to finish on shutdown
+        pollMode = PollMode.ROUND_ROBIN // the poll mode for all workers (see PollMode enum for more information)
         frontend {
             enabled = true
             responseType = 'JSON' // one of JSON or XML, defaults to JSON

@@ -5,6 +5,8 @@ import org.joda.time.DateTime
 
 class UberJobMeta implements UberApiResponseObject {
 
+    def grailsApplication
+
     /**
      * All the triggers that are attached to this job
      */
@@ -65,4 +67,9 @@ class UberJobMeta implements UberApiResponseObject {
                 earliestNextExecution: earliestNextExecution?.millis
         ]
     }
+
+    def getJobBean() {
+        grailsApplication.mainContext.getBean(job)
+    }
+
 }

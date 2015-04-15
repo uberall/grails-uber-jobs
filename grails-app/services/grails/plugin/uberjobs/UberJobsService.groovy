@@ -23,7 +23,7 @@ class UberJobsService extends AbstractUberService {
         if (config.jobs.cleanup) {
             def jobList = UberJobMeta.list()
             def namesFromDB = jobList.job
-            def jobNames = jobClasses.name
+            def jobNames = jobClasses.fullName
             (namesFromDB - jobNames).each { name ->
                 log.info "pruning information for JobMeta -> $name"
                 jobList.find { it.job == name }.delete()
@@ -53,7 +53,7 @@ class UberJobsService extends AbstractUberService {
     }
 
     private initJob(GrailsUberJobClass job) {
-        def name = job.name
+        def name = job.fullName
         log.debug("handling JobMeta for $job")
         UberJobMeta jobMeta = UberJobMeta.findByJob(name)
         if (!jobMeta) {
