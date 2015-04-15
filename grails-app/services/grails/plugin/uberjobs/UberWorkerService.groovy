@@ -24,28 +24,28 @@ class UberWorkerService extends AbstractUberService {
             } else {
                 throw new RuntimeException("queueNames of $poolName must be a List, Closure (returning a list) or a String. ${config.queueNames.class.simpleName} is not allowed!")
             }
+            def queues = []
+            queueNames.each { String name
+                queues << uberQueueService.findOrCreate(name)
+            }
             // start the appropiate amount of workers
             config.workers.times { index ->
-                start(poolName, index, queueNames)
+                start(poolName, index, queues)
             }
         }
     }
 
-    def start(poolName, index, queueNames){
+    def start(poolName, index, queues){
         UberWorkerMeta workerMeta = UberWorkerMeta.findByPoolNameAndHostnameAndIndex(poolName, hostName, index)
         if(!workerMeta){
-            workerMeta = createWorker(poolName, index, queueNames)
+            workerMeta = createWorker(poolName, index, queues)
         } else if(config.workers.update){
             // TODO: UPDATE
         }
         //TODO: start the actual Thread
     }
 
-    def createWorker(String poolName, int index, List queueNames) {
-        def queues = []
-        queueNames.each { String name
-            queues << uberQueueService.findOrCreate(name)
-        }
+    def createWorker(String poolName, int index, List queues) {
         uberWorkerMetaService.create(poolName, index, queues)
     }
 
