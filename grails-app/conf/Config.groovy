@@ -5,6 +5,7 @@ grails.project.groupId = 'grails.plugin.uberjobs'
 grails {
     uberjobs {
         enabled = true // enable the plugin itself
+        waitForJobsOnShutdown = true // whether or not wait for jobs to finish on shutdown
         jobs {
             update = true // enable updating JobMeta on application startup
             cleanup = true // enable pruning JobMeta of Jobs that are not found in code anymore

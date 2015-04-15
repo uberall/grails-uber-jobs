@@ -117,7 +117,8 @@ Brief summary/description of the plugin.
     }
 
     def onShutdown = { event ->
-        // TODO Implement code that is executed when the application shuts down (optional)
+        if(application.config.grails.uberjobs.waitForJobsOnShutdown)
+            application.mainContext.uberWorkerService.shutdown()
     }
 
     private static boolean isPluginEnabled(def application) {

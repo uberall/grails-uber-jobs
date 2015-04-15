@@ -71,6 +71,6 @@ class UberWorkerMeta {
         /**
          * Worker was killed
          */
-        KILLED
+        STOPPED
     }
 }

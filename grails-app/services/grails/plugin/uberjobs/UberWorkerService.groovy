@@ -8,9 +8,11 @@ class UberWorkerService extends AbstractUberService {
     def uberQueueService
     def uberWorkerMetaService
 
+    private static final List WORKERS = []
+
     def createWorkersFromConfig() {
         // iterate over workers configurations
-        config.workers.each { poolName, config ->
+        config.workers.each { String poolName, config ->
             if (poolName in ['update', 'cleanup', 'restart']) {
                 return
             }
@@ -29,12 +31,28 @@ class UberWorkerService extends AbstractUberService {
             }
             def queues = []
             queueNames.each { name ->
-                queues << uberQueueService.findOrCreate(name)
+                queues << uberQueueService.findOrCreate(name.toString())
             }
             // start the appropiate amount of workers
-            config.workers.times { index ->
+            config.workers.times { int index ->
                 start(poolName, index, queues)
             }
+        }
+    }
+
+    def shutdown(){
+        log.info("Shutting down ${UberWorkerMeta.countByHostnameAndStatusNotEqual(hostName, UberWorkerMeta.Status.STOPPED)}")
+        WORKERS.each { worker ->
+            //TODO: it.end()
+        }
+        boolean allDone = false
+        int attempts = 10
+        while(!allDone){
+            sleep(1000)
+            int notStopped = UberWorkerMeta.countByHostnameAndStatusNotEqual(hostName, UberWorkerMeta.Status.STOPPED)
+            log.info("Shutdown attempt ${attempts-9} of $attempts -> $notStopped Workers has not beed stopped by now.")
+            allDone = notStopped == 0 || attempts == 1
+            attempts--
         }
     }
 
@@ -45,7 +63,7 @@ class UberWorkerService extends AbstractUberService {
         } else if (config.workers.update) {
             // TODO: UPDATE
         }
-        //TODO: start the actual Thread
+        //TODO: start the actual Thread and add it to the list of workers
     }
 
     String getName(poolName, index) {
