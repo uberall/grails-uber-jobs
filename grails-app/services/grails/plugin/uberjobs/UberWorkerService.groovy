@@ -38,7 +38,7 @@ class UberWorkerService extends AbstractUberService {
         }
     }
 
-    def start(String poolName, int index, List<UberQueueMeta> queues) {
+    def start(String poolName, int index, List<UberQueue> queues) {
         UberWorkerMeta workerMeta = UberWorkerMeta.findByPoolNameAndHostnameAndIndex(poolName, hostName, index)
         if (!workerMeta) {
             workerMeta = uberWorkerMetaService.create(poolName, index, queues)
