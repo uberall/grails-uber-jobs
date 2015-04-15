@@ -6,7 +6,7 @@ import grails.transaction.Transactional
 class UberWorkerMetaService extends AbstractUberService{
 
     def create(String poolName, int index, List<UberQueue> queues) {
-        UberWorkerMeta workerMeta = new UberWorkerMeta(poolName: poolName, index: index, hostname: hostName)
+        UberWorkerMeta workerMeta = new UberWorkerMeta(poolName: poolName, index: index, hostname: hostName, status:  UberWorkerMeta.Status.STARTING)
         queues.each {
             workerMeta.addToQueues(it)
         }

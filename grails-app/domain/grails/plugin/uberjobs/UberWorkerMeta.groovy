@@ -1,5 +1,6 @@
 package grails.plugin.uberjobs
 
+import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 import org.joda.time.DateTime
 
 /**
@@ -40,7 +41,13 @@ class UberWorkerMeta {
     static constraints = {
         hostname nullable: false
         poolName nullable: false
-        index min: 1
+        index min: 0
+    }
+
+    static mapping = {
+        index column: 'pool_index'
+        dateCreated type: PersistentDateTime
+        lastUpdated type: PersistentDateTime
     }
 
     /**
