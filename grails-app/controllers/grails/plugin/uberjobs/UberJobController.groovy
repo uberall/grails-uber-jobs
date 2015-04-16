@@ -19,9 +19,15 @@ class UberJobController extends AbstractUberController {
         renderResponse([list: jobs, total: jobs.totalCount])
     }
 
-    def enqueue() {}
+    def enqueue() {
+        //TODO: implement me!
+    }
 
-    def delete() {}
+    def delete() {
+        //TODO: implement me!
+    }
 
-    def update() {}
+    def update() {
+        //TODO: implement me!
+    }
 }

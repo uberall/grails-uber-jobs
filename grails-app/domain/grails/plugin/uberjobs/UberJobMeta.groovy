@@ -49,6 +49,7 @@ class UberJobMeta implements UberApiResponseObject {
     static mapping = {
         lastUpdated type: PersistentDateTime
         earliestNextExecution type: PersistentDateTime
+        triggers fetch: 'join'
     }
 
     @Override

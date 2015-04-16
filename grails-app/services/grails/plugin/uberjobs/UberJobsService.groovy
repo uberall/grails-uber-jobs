@@ -39,7 +39,7 @@ class UberJobsService extends AbstractUberService {
             }.flatten()
             (namesFromDB - triggerNames).each { name ->
                 log.info "pruning information for TriggerMeta -> $name"
-                triggerList.find { it.name == name }.delete()
+                uberTriggerMetaService.delete(triggerList.find { it.name == name })
             }
         }
     }

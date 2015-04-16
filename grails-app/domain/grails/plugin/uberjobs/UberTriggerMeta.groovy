@@ -43,7 +43,10 @@ class UberTriggerMeta implements UberApiResponseObject {
 
     static constraints = {
         name unique: true, nullable: false
-        cronExpression nullable: false
+        cronExpression nullable: false, validator: { val ->
+            if(!CronExpression.isValidExpression(val))
+                'INVALID_EXPRESSION'
+        }
         queueName nullable: false
         job nullable: false
         lastFired nullabe: true
@@ -62,12 +65,11 @@ class UberTriggerMeta implements UberApiResponseObject {
                 name          : name,
                 queueName     : queueName,
                 cronExpression: cronExpression,
+                nextFire      : new CronExpression(cronExpression).getNextValidTimeAfter(DateTime.now()).millis,
                 enabled       : enabled,
                 lastFired     : lastFired?.millis,
                 dateCreated   : dateCreated?.millis,
                 lastUpdated   : lastUpdated?.millis,
-                // TODO: add nextFire here (should be the parsed cron expression no?)
-
         ]
     }
 }

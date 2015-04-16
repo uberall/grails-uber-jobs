@@ -33,9 +33,17 @@ class AbstractUberController {
         }
     }
 
-    protected renderErrorResponse(def object){
+    protected renderBadRequest(def object){
         response.status = HttpStatus.BAD_REQUEST.value()
-        renderResponse([error: object.errors.allErrors.field])
+        renderResponse(object)
+    }
+
+    protected renderErrorResponse(def object){
+        def errors = [:]
+        object.errors.allErrors.each {
+            errors << [(it.field): it.codes.last().toUpperCase() ?: 'INVALID']
+        }
+        renderBadRequest([error: errors])
     }
 
     protected renderNotFound(){
@@ -43,8 +51,16 @@ class AbstractUberController {
         renderResponse([error: 'Requested resource not found'])
     }
 
-
     protected getConfig() {
         grailsApplication.config.grails.uberjobs
+    }
+
+    protected withDomainObject(def domainClass, Closure c){
+        def object = domainClass.get(params.getLong("id"))
+        if(!object){
+            renderNotFound()
+        } else {
+            c.call object
+        }
     }
 }

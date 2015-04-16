@@ -15,29 +15,20 @@ class UberJobMetaController extends AbstractUberController {
     }
 
     def get() {
-        withUberJobMeta { jobMeta ->
+        withDomainObject(UberJobMeta) { jobMeta ->
             renderResponse([jobMeta: jobMeta])
         }
     }
 
     @Transactional(readOnly = false)
     def update() {
-        withUberJobMeta { UberJobMeta jobMeta ->
-            UberJobMeta result = uberJobMetaService.update(jobMeta, params)
+        withDomainObject(UberJobMeta) { UberJobMeta jobMeta ->
+            UberJobMeta result = uberJobMetaService.update(jobMeta, request.JSON as Map)
             if(result.validate()) {
-                renderResponse(jobMeta: jobMeta)
+                renderResponse(jobMeta: result)
             } else {
                 renderErrorResponse(result)
             }
-        }
-    }
-
-    private void withUberJobMeta(Closure closure) {
-        UberJobMeta jobMeta = UberJobMeta.get(params.getLong('id'))
-        if (!jobMeta) {
-            renderNotFound()
-        } else {
-            closure.call jobMeta
         }
     }
 }
