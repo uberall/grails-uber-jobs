@@ -11,6 +11,13 @@ class UberWorkerService extends AbstractUberService {
     private static final List WORKERS = []
 
     def createWorkersFromConfig() {
+        def currentCount = UberWorkerMeta.countByHostname(hostName)
+        if(currentCount) {
+            log.info("pruning $currentCount workers from database")
+            UberWorkerMeta.findAllByHostname(hostName).each {
+                it.delete()
+            }
+        }
         // iterate over workers configurations
         config.workers.each { String poolName, config ->
             if (poolName in ['update', 'cleanup', 'restart']) {
@@ -64,6 +71,7 @@ class UberWorkerService extends AbstractUberService {
             // TODO: UPDATE
         }
         //TODO: start the actual Thread and add it to the list of workers
+        workerMeta
     }
 
     String getName(poolName, index) {
