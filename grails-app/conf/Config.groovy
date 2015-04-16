@@ -6,6 +6,11 @@ grails {
     uberjobs {
         enabled = true // enable the plugin itself
         waitForJobsOnShutdown = true // whether or not wait for jobs to finish on shutdown
+        frontend {
+            enabled = true
+            responseType = 'JSON' // one of JSON or XML, defaults to JSON
+            max = 20 // default max list size
+        }
         jobs {
             update = true // enable updating JobMeta on application startup
             cleanup = true // enable pruning JobMeta of Jobs that are not found in code anymore

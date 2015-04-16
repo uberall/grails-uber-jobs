@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 /**
  * A item of a Queue which knows what to perform when
  */
-class UberQueueItem {
+class UberJob {
 
     /**
      * Every item belongs into a Queue

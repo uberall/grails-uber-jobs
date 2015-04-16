@@ -11,7 +11,7 @@ class UberQueue {
     /**
      * The list of items to perform
      */
-    static hasMany = [items: UberQueueItem]
+    static hasMany = [items: UberJob]
 
     /**
      * The name of the Queue

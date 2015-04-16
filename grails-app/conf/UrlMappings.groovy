@@ -1,13 +1,11 @@
 class UrlMappings {
 
 	static mappings = {
-        "/$controller/$action?/$id?(.$format)?"{
-            constraints {
-                // apply constraints here
-            }
-        }
 
-        "/"(view:"/index")
-        "500"(view:'/error')
+        "/uberjobs/jobs"(controller: 'uberJob', action: [GET: 'list', POST: 'enqueue'])
+        "/uberjobs/jobs/$id"(controller: 'uberJob', action: [GET: 'get', DELETE: 'delete', PUT: 'update'])
+        "/uberjobs/jobMetas"(controller: 'uberJobMeta', action: [GET: 'list'])
+        "/uberjobs/jobMetas/$id"(controller: 'uberJobMeta', action: [GET: 'get', PUT: 'update'])
+
 	}
 }
