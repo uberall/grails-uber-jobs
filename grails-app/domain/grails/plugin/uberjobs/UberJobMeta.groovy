@@ -3,7 +3,7 @@ package grails.plugin.uberjobs
 import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 import org.joda.time.DateTime
 
-class UberJobMeta {
+class UberJobMeta implements UberApiResponseObject {
 
     /**
      * All the triggers that are attached to this job
@@ -51,6 +51,17 @@ class UberJobMeta {
         earliestNextExecution type: PersistentDateTime
     }
 
-
-
+    @Override
+    Map toResponseObject() {
+        [
+                id                   : id,
+                triggers             : triggers.collect { [id: it.id, name: it.name] },
+                job                  : job,
+                enabled              : enabled,
+                singletonJob         : singletonJob,
+                minDelay             : minDelay,
+                lastUpdated          : lastUpdated?.millis,
+                earliestNextExecution: earliestNextExecution?.millis
+        ]
+    }
 }

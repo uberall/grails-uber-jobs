@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 /**
  * A List of items to work on, which can be enabled and disabled on the fly
  */
-class UberQueue {
+class UberQueue implements UberApiResponseObject {
 
     /**
      * The list of items to perform
@@ -36,5 +36,17 @@ class UberQueue {
     static mapping = {
         dateCreated type: PersistentDateTime
         lastUpdated type: PersistentDateTime
+    }
+
+    @Override
+    Map toResponseObject() {
+        [
+                id         : id,
+                name       : name,
+                enabled    : enabled,
+                dateCreated: dateCreated?.millis,
+                lastUpdated: lastUpdated?.millis,
+                items      : UberJob.countByQueue(this)
+        ]
     }
 }

@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 /**
  * Worker meta information
  */
-class UberWorkerMeta {
+class UberWorkerMeta implements UberApiResponseObject {
 
     /**
      * The queues this worker is allowed to work on
@@ -63,21 +63,35 @@ class UberWorkerMeta {
         /**
          * Worker is doing nothing as no work has to be done
          */
-        IDLE,
+                IDLE,
 
         /**
          * Worker is working
          */
-        WORKING,
+                WORKING,
 
         /**
          * Worker is paused
          */
-        PAUSED,
+                PAUSED,
 
         /**
          * Worker was killed
          */
-        STOPPED
+                STOPPED
+    }
+
+    @Override
+    Map toResponseObject() {
+        [
+                id         : id,
+                hostname   : hostname,
+                poolName   : poolName,
+                index      : index,
+                status     : status.toString(),
+                dateCreated: dateCreated?.millis,
+                lastUpdated: lastUpdated?.millis,
+                queues     : queues.collect { [id: it.id, name: it.name] }
+        ]
     }
 }

@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 /**
  * A item of a Queue which knows what to perform when
  */
-class UberJob {
+class UberJob implements UberApiResponseObject {
 
     /**
      * Every item belongs into a Queue
@@ -85,6 +85,21 @@ class UberJob {
         started type: PersistentDateTime
         done type: PersistentDateTime
         argumentsJSON column: 'arguments', type: 'text'
+    }
+
+    @Override
+    Map toResponseObject() {
+        [
+                id         : id,
+                queue      : queueId,
+                job        : jobId,
+                arguments  : arguments,
+                status     : status.toString(),
+                doAt       : doAt.millis,
+                started    : started?.millis,
+                done       : done?.millis,
+                dateCreated: dateCreated?.millis
+        ]
     }
 
     enum Status {

@@ -1,5 +1,8 @@
+import grails.converters.JSON
+import grails.converters.XML
 import grails.plugin.uberjobs.GrailsUberJobClass
 import grails.plugin.uberjobs.TriggersConfigBuilder
+import grails.plugin.uberjobs.UberApiResponseObject
 import grails.plugin.uberjobs.UberJobArtefactHandler
 import grails.plugin.uberjobs.UberJobsService
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
@@ -75,6 +78,19 @@ Brief summary/description of the plugin.
                 log.info "parsing information from $uberJobClass"
                 configureJobBeans.delegate = delegate
                 configureJobBeans(uberJobClass)
+            }
+        }
+
+        application.domainClasses.each { clazz ->
+            def domainClazz = clazz.clazz
+            if(domainClazz in UberApiResponseObject) {
+                log.info("Registering object marshaller for $domainClazz")
+                JSON.registerObjectMarshaller(clazz.clazz) {
+                    it.toResponseObject()
+                }
+                XML.registerObjectMarshaller(clazz.clazz) {
+                    it.toResponseObject()
+                }
             }
         }
     }

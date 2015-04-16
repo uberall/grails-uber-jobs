@@ -1,13 +1,15 @@
 package grails.plugin.uberjobs
 
-import grails.validation.Validateable
 import org.springframework.http.HttpStatus
 
 class AbstractUberController {
 
     def beforeInterceptor = {
-        if(!config.frontend.enabled)
+        if(!config.frontend.enabled){
+            renderNotFound()
             return false
+        }
+
         normalizeParameters()
         true
     }
@@ -43,6 +45,6 @@ class AbstractUberController {
 
 
     protected getConfig() {
-        grailsApplication.config.uberjobs
+        grailsApplication.config.grails.uberjobs
     }
 }

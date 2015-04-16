@@ -1,7 +1,7 @@
 // configuration for plugin testing - will not be included in the plugin zip
 
 grails.project.groupId = 'grails.plugin.uberjobs'
-
+grails.app.context = '/'
 grails {
     uberjobs {
         enabled = true // enable the plugin itself

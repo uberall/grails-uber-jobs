@@ -3,7 +3,7 @@ package grails.plugin.uberjobs
 import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 import org.joda.time.DateTime
 
-class UberTriggerMeta {
+class UberTriggerMeta implements UberApiResponseObject {
 
     /**
      * The job that this trigger belongs to
@@ -55,4 +55,19 @@ class UberTriggerMeta {
         lastFired type: PersistentDateTime
     }
 
+    @Override
+    Map toResponseObject() {
+        [
+                id            : id,
+                name          : name,
+                queueName     : queueName,
+                cronExpression: cronExpression,
+                enabled       : enabled,
+                lastFired     : lastFired?.millis,
+                dateCreated   : dateCreated?.millis,
+                lastUpdated   : lastUpdated?.millis,
+                // TODO: add nextFire here (should be the parsed cron expression no?)
+
+        ]
+    }
 }
