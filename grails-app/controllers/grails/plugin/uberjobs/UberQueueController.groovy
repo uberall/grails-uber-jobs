@@ -8,7 +8,10 @@ class UberQueueController extends AbstractUberController {
     def uberQueueService
 
     def list() {
-        def list = UberQueue.list(params)
+        def list = UberQueue.createCriteria().list {
+            if(!params.getBoolean('includeEmpty'))
+                sizeGt('items', 0)
+        }
         renderResponse([list: list, total: list.totalCount])
     }
 

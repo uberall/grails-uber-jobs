@@ -11,7 +11,7 @@ class UberJobMetaController extends AbstractUberController {
 
     def list() {
         def list = UberJobMeta.list(params)
-        renderResponse([list: list, total: list.totalCount])
+        renderResponse([list: list, total: UberJobMeta.count])
     }
 
     def get() {

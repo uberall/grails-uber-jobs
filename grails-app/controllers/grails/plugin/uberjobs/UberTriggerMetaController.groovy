@@ -11,7 +11,7 @@ class UberTriggerMetaController extends AbstractUberController {
 
     def list() {
         def list = UberTriggerMeta.list(params)
-        renderResponse([list: list, total: list.totalCount])
+        renderResponse([list: list, total: UberTriggerMeta.count])
     }
 
     def get() {
