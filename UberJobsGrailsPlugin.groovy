@@ -1,10 +1,8 @@
 import grails.converters.JSON
 import grails.converters.XML
 import grails.plugin.uberjobs.GrailsUberJobClass
-import grails.plugin.uberjobs.TriggersConfigBuilder
 import grails.plugin.uberjobs.UberApiResponseObject
 import grails.plugin.uberjobs.UberJobArtefactHandler
-import grails.plugin.uberjobs.UberJobsService
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 
 class UberJobsGrailsPlugin {
@@ -15,7 +13,7 @@ class UberJobsGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/**",
-            "grails-app/jobs/**",
+            "grails-app/jobs/grails/plugin/jobs/test/**",
             "test/**"
     ]
 
@@ -83,7 +81,7 @@ Brief summary/description of the plugin.
 
         application.domainClasses.each { clazz ->
             def domainClazz = clazz.clazz
-            if(domainClazz in UberApiResponseObject) {
+            if (domainClazz in UberApiResponseObject) {
                 log.info("Registering object marshaller for $domainClazz")
                 JSON.registerObjectMarshaller(clazz.clazz) {
                     it.toResponseObject()
@@ -133,7 +131,7 @@ Brief summary/description of the plugin.
     }
 
     def onShutdown = { event ->
-        if(application.config.grails.uberjobs.waitForJobsOnShutdown)
+        if (application.config.grails.uberjobs.waitForJobsOnShutdown)
             application.mainContext.uberWorkerService.shutdown()
     }
 

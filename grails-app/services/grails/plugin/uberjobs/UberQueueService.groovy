@@ -1,6 +1,7 @@
 package grails.plugin.uberjobs
 
 import grails.transaction.Transactional
+import org.joda.time.DateTime
 
 @Transactional
 class UberQueueService extends AbstractUberService {
@@ -31,5 +32,9 @@ class UberQueueService extends AbstractUberService {
 
     def enabled(UberQueue uberQueue) {
         update(uberQueue, true)
+    }
+
+    def clear(UberQueue uberQueue, DateTime until = DateTime.now()){
+        UberJob.where {queue == uberQueue && status == UberJob.Status.OPEN && doAt < until}.deleteAll()
     }
 }

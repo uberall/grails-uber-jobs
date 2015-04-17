@@ -1,4 +1,4 @@
-package grails.plugin.uberjobs
+package grails.plugin.uberjobs.test
 
 class ScheduledTestJob {
 

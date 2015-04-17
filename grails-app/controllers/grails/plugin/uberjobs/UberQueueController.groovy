@@ -1,21 +1,54 @@
 package grails.plugin.uberjobs
 
-class UberQueueController {
+import grails.transaction.Transactional
 
+@Transactional(readOnly = true)
+class UberQueueController extends AbstractUberController {
+
+    def uberQueueService
 
     def list() {
-        //TODO: implement me!
+        def list = UberQueue.list(params)
+        renderResponse([list: list, total: list.totalCount])
     }
-    def get(){
-        //TODO: implement me!
+
+    def get() {
+        withDomainObject(UberQueue) {
+            renderResponse([queue: it])
+        }
     }
-    def update(){
-        //TODO: implement me!
+
+    @Transactional(readOnly = false)
+    def update() {
+        def json = request.JSON
+        if (json.enabled == null) {
+            renderBadRequest([error: [enabled: 'NULLABLE']])
+        } else if (!(json.enabled in Boolean)) {
+            renderBadRequest([error: [enabled: 'INVALID']])
+        } else {
+            withDomainObject(UberQueue) { UberQueue uberQueue ->
+                renderResponse(queue: uberQueueService.update(uberQueue, json.enabled))
+            }
+        }
     }
-    def clear(){
-        //TODO: implement me!
+
+    @Transactional(readOnly = false)
+    def clear() {
+        withDomainObject(UberQueue) {
+            uberQueueService.clear(it)
+            renderResponse([queue: it])
+        }
     }
-    def delete(){
-        //TODO: implement me!
+
+    @Transactional(readOnly = false)
+    def delete() {
+        withDomainObject(UberQueue)  {uberQueue->
+            if(params.synchronous){
+                uberQueueService.clear(uberQueue)
+            } else {
+                // enqueue job to clear
+            }
+            renderResponse([success: true])
+        }
     }
 }
