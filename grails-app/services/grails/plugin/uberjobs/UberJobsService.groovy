@@ -1,6 +1,7 @@
 package grails.plugin.uberjobs
 
 import grails.transaction.Transactional
+import org.joda.time.DateTime
 
 @Transactional
 class UberJobsService extends AbstractUberService {
@@ -8,6 +9,31 @@ class UberJobsService extends AbstractUberService {
     def uberJobMetaService
     def uberTriggerMetaService
     def uberQueueService
+
+    def enqueue(String job, List arguments, String queue = null, DateTime at = DateTime.now()){
+        def jobClass = grailsApplication.uberJobClasses.find{it.fullName == job}
+        assert jobClass, "No Job found for name $job"
+        enqueue(jobClass.clazz as Class, arguments, queue, at)
+    }
+
+    def enqueue(Class job, List arguments, String queue = null, DateTime at = DateTime.now()){
+        def jobClass = grailsApplication.uberJobClasses.find{it.fullName == job.canonicalName}
+        UberJobMeta jobMeta = UberJobMeta.findByJob(jobClass.fullName)
+        UberQueue uberQueue = uberQueueService.findOrCreate(queue ?: jobClass.defaultQueueName)
+        UberJob uberJob = new UberJob(
+                job: jobMeta,
+                queue: uberQueue,
+                doAt: at,
+                status: UberJob.Status.OPEN,
+        )
+        uberJob.arguments.addAll(arguments)
+        if(uberJob.validate()){
+            uberJob.save()
+        }else {
+            log.error("UberJob could not be validated: $uberJob.errors.allErrors")
+        }
+        uberJob
+    }
 
     /**
      * scans all "UberJobArtefacts" and updates/creates meta information for Jobs, Triggers and Queues

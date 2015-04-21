@@ -44,9 +44,9 @@ class UberQueue implements UberApiResponseObject {
                 id         : id,
                 name       : name,
                 enabled    : enabled,
-                dateCreated: dateCreated?.millis,
-                lastUpdated: lastUpdated?.millis,
-                items      : UberJob.countByQueue(this)
+                dateCreated: dateCreated,
+                lastUpdated: lastUpdated,
+                items      : UberJob.countByQueueAndStatus(this, UberJob.Status.OPEN)
         ]
     }
 }

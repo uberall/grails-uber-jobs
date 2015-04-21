@@ -60,13 +60,13 @@ class UberJob implements UberApiResponseObject {
     transient List arguments = []
 
     List getArguments() {
-        if (!arguments)
+        if (!arguments && argumentsJSON)
             arguments = JSON.parse(argumentsJSON) as List
         arguments
     }
 
     void beforeValidate() {
-        argumentsJSON = (arguments) as JSON
+        argumentsJSON = ((arguments) as JSON).toString()
     }
 
     static constraints = {
@@ -93,12 +93,12 @@ class UberJob implements UberApiResponseObject {
                 id         : id,
                 queue      : queueId,
                 job        : jobId,
-                arguments  : arguments,
+                arguments  : getArguments(),
                 status     : status.toString(),
-                doAt       : doAt.millis,
-                started    : started?.millis,
-                done       : done?.millis,
-                dateCreated: dateCreated?.millis
+                doAt       : doAt,
+                started    : started,
+                done       : done,
+                dateCreated: dateCreated
         ]
     }
 

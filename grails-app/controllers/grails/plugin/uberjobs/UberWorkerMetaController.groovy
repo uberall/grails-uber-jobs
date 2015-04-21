@@ -6,8 +6,11 @@ class UberWorkerMetaController extends AbstractUberController {
     def uberWorkerMetaService
 
     def list() {
-        def list = UberWorkerMeta.createCriteria().list{
-            if(!params.includeStopped){
+        def list = UberWorkerMeta.createCriteria().list(params) {
+            if(!params.getBoolean("includeIdle")){
+                notEqual('status', UberWorkerMeta.Status.IDLE)
+            }
+            if(!params.getBoolean("includeStopped")){
                 notEqual('status', UberWorkerMeta.Status.STOPPED)
             }
         }

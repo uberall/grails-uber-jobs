@@ -85,7 +85,7 @@
     </object>
     <object type="LMREQUEST" id="z104">
         <attribute name="uuid" type="string">8DF611AB-B652-4B8D-B47C-C49ACF9F7995</attribute>
-        <attribute name="url" type="string">http://localhost:8080/uberjobs/jobmetas</attribute>
+        <attribute name="url" type="string">http://localhost:8080/uberjobs/jobmetas?sort=job\u2600order=asc\u2600max=0</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>

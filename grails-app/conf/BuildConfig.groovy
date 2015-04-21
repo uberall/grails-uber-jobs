@@ -26,6 +26,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        mavenRepo "https://raw.github.com/peh/errbuddy-plugins/mvn-repo"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -45,8 +46,13 @@ grails.project.dependency.resolution = {
             export = false
         }
 
+        runtime (":cors:1.1.6"){
+            export = false
+        }
+
         // hibernate is needed just for joda-time persistence, we either need to remove joda-time or find a better way to work around this
         compile(':hibernate4:4.3.6.1')
         compile ":joda-time:1.5"
+
     }
 }

@@ -5,12 +5,18 @@ import grails.transaction.Transactional
 @Transactional(readOnly = true)
 class UberQueueController extends AbstractUberController {
 
+    static allowedMethods = [list: 'GET', get: 'GET', update: 'PUT', clear: 'GET', delete: 'DELETE']
+
+    // TODO: allowed methods
     def uberQueueService
 
     def list() {
-        def list = UberQueue.createCriteria().list {
-            if(!params.getBoolean('includeEmpty'))
-                sizeGt('items', 0)
+        def list = UberQueue.createCriteria().list(params) {
+            if (!params.getBoolean('includeEmpty')) {
+                items {
+                    eq("status", UberJob.Status.OPEN)
+                }
+            }
         }
         renderResponse([list: list, total: list.totalCount])
     }
@@ -45,8 +51,8 @@ class UberQueueController extends AbstractUberController {
 
     @Transactional(readOnly = false)
     def delete() {
-        withDomainObject(UberQueue)  {uberQueue->
-            if(params.synchronous){
+        withDomainObject(UberQueue) { uberQueue ->
+            if (params.synchronous) {
                 uberQueueService.clear(uberQueue)
             } else {
                 // enqueue job to clear

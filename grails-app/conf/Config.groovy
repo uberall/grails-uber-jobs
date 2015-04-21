@@ -29,7 +29,7 @@ grails {
             // generic worker pool
             genericPool {
                 workers = 3
-                queueNames = "testJobQueue"
+                queueNames = ["testJobQueue", "TestQueue"]
             }
             // only working on jobs that use a browser; 1 worker ensures that we don't try to create 2 browsers at the same time.
             usingBrowserPool {
@@ -70,3 +70,4 @@ log4j = {
 
     debug 'grails.plugin.uberjobs'
 }
+cors.url.pattern = '/*'

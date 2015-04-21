@@ -12,6 +12,8 @@ class UrlMappings {
         "/uberjobs/workers/$id"(controller: 'uberWorkerMeta', action: [GET: 'get'], parseRequest: true)
         "/uberjobs/workers/$id/pause"(controller: 'uberWorkerMeta', action: [PUT: 'pause'], parseRequest: true)
         "/uberjobs/workers/$id/stop"(controller: 'uberWorkerMeta', action: [PUT: 'stop'], parseRequest: true)
-
+        "/uberjobs/queues"(controller: 'uberQueue', action: [GET: 'list'])
+        "/uberjobs/queues/$id"(controller: 'uberQueue', action: [GET: 'get', PUT: 'update', DELETE: 'delete'], parseRequest: true)
+        "/uberjobs/queues/$id/clear"(controller: 'uberQueue', action: [GET: 'clear'])
     }
 }

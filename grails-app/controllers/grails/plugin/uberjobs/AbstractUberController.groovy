@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus
 
 class AbstractUberController {
 
+    def uberJobsService
+
     def beforeInterceptor = {
         if(!config.frontend.enabled){
             renderNotFound()
