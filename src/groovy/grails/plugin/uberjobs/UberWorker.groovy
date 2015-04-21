@@ -52,7 +52,7 @@ class UberWorker implements Runnable {
                 }
 
                 if (!worked) {
-//                    log.debug("no more work ... sleeping")
+                    log.trace("no more work, sleeping ...")
                     Thread.sleep(EMPTY_QUEUE_SLEEP_TIME)
                 }
             } catch (InterruptedException ignore) {
@@ -89,7 +89,7 @@ class UberWorker implements Runnable {
                         } else if (++missCount >= queueNames.size() && workerMeta.status == UberWorkerMeta.Status.IDLE) {
                             // Keeps worker from busy-spinning on empty queues
                             missCount = 0
-//                            log.debug("no more work ... sleeping")
+                            log.trace("no more work, sleeping ...")
                             Thread.sleep(EMPTY_QUEUE_SLEEP_TIME)
                         }
                     }
