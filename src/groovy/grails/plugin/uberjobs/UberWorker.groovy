@@ -209,7 +209,7 @@ class UberWorker implements Runnable {
      */
     protected void process(UberJob job, UberQueue curQueue) {
         try {
-            log.debug("processing job $job, setting state to WORKING")
+            log.debug("processing job $job, worker is now WORKING")
             workerMeta.status = UberWorkerMeta.Status.WORKING
             workerMeta.save()
 
@@ -220,6 +220,7 @@ class UberWorker implements Runnable {
         } catch (Throwable t) {
             failure(t, job, curQueue)
         } finally {
+            log.debug("processing job $job finished, worker is now IDLE")
             workerMeta.status = UberWorkerMeta.Status.IDLE
             workerMeta.save()
         }
@@ -328,10 +329,12 @@ class UberWorker implements Runnable {
 //    }
 
     /**
-     * Removes a job from the given queue.
+     * Pops a job from the given queue.
+     * Uses optimistic locking to check if another worked grabbed the job in between and returns null in that case.
+     * Otherwise the job - which also has been marked as WORKING - is returned.
      *
-     * @param curQueue the queue to remove a job from
-     * @return a JSON string of a job or null if there was nothing to de-queue
+     * @param curQueue the queue to pop a job from
+     * @return a Job which this worker may work on or null if the queue is empty
      */
     protected UberJob pop(UberQueue queue) {
         UberJob job = null
@@ -339,11 +342,12 @@ class UberWorker implements Runnable {
         try {
             job = UberJob.findByStatusAndQueueAndDoAtLessThan(UberJob.Status.OPEN, queue, DateTime.now())
             if (job) {
+                log.debug("marking job $job.id as WORKING")
                 job.status = UberJob.Status.WORKING
                 job.save()
             }
         } catch (OptimisticLockingFailureException ignore) {
-            log.debug("another worker already popped job $job ...")
+            log.debug("another worker already popped job $job.id, trying again ...")
             job = null
         }
 
@@ -366,16 +370,6 @@ class UberWorker implements Runnable {
                 }
             }
         }
-    }
-
-    /**
-     * Returns an instance of the actual job class.
-     *
-     * @param jobMeta the jobMeta
-     * @return instance of the job
-     */
-    protected def materializeJob(UberJobMeta job) {
-        return grailsApplication.mainContext.getBean(job.job)
     }
 
     @Override
