@@ -104,7 +104,9 @@ class UberWorker implements Runnable {
         }
     }
 
-    protected void pollRandom() {}
+    protected void pollRandom() {
+        // TODO: implement
+    }
 
     /**
      * Creates a new UberWorker.
