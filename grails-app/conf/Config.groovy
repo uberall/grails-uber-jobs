@@ -40,9 +40,6 @@ grails {
     }
 }
 
-
-
-
 log4j = {
     // Example of changing the log pattern for the default console
     // appender:
@@ -70,4 +67,5 @@ log4j = {
 
     debug 'grails.plugin.uberjobs'
 }
+
 cors.url.pattern = '/*'
