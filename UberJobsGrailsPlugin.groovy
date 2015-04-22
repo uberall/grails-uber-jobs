@@ -13,11 +13,10 @@ class UberJobsGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/**",
-            "grails-app/jobs/grails/plugin/jobs/test/**",
+            "grails-app/jobs/grails/plugin/uberjobs/test/**",
             "test/**"
     ]
 
-    // TODO Fill in these fields
     def title = "Uber Jobs Plugin" // Headline display name of the plugin
     def author = "Philipp Eschenbach"
     def authorEmail = "philipp@uberall.com"
@@ -64,11 +63,10 @@ Brief summary/description of the plugin.
         }
 
         def jobClasses = application.uberJobClasses
-        def configuration = application.config.grails.uberjobs
 
         if (!jobClasses) {
-            //TODO insert documentationlink to disabling
-            log.warn("No UberJobs found, you should probably disable the uber-jobs plugin. see: TODO!^")
+            // TODO insert documentationlink to disabling
+            log.warn("No UberJobs found, you should probably disable the uber-jobs plugin. see: TODO!")
         } else {
 
             log.debug("${jobClasses.size()} Jobs found. will start processing them")
