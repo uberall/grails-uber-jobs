@@ -1,6 +1,6 @@
 package grails.plugin.uberjobs
 
-class UberJobController extends AbstractUberController {
+class UberJobsJobController extends AbstractUberJobsController {
 
     static allowedMethods = [list: 'GET', get: 'GET', enqueue: 'POST', delete: 'DELETE', update: 'PUT']
 

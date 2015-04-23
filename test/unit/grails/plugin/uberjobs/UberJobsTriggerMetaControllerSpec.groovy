@@ -6,8 +6,8 @@ import spock.lang.Specification
 /**
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
  */
-@TestFor(UberQueueController)
-class UberQueueControllerSpec extends Specification {
+@TestFor(UberJobsTriggerMetaController)
+class UberJobsTriggerMetaControllerSpec extends Specification {
 
     def setup() {
     }

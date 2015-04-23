@@ -6,8 +6,8 @@ import spock.lang.Specification
 /**
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
  */
-@TestFor(UberJobController)
-class UberJobControllerSpec extends Specification {
+@TestFor(UberJobsJobController)
+class UberJobsJobControllerSpec extends Specification {
 
     def setup() {
     }

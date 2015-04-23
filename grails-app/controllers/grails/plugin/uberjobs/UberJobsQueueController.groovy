@@ -3,7 +3,7 @@ package grails.plugin.uberjobs
 import grails.transaction.Transactional
 
 @Transactional(readOnly = true)
-class UberQueueController extends AbstractUberController {
+class UberJobsQueueController extends AbstractUberJobsController {
 
     static allowedMethods = [list: 'GET', get: 'GET', update: 'PUT', clear: 'GET', delete: 'DELETE']
 

@@ -1,6 +1,6 @@
 package grails.plugin.uberjobs
 
-class UberWorkerMetaController extends AbstractUberController {
+class UberJobsWorkerMetaController extends AbstractUberJobsController {
 
     def uberWorkerService
     def uberWorkerMetaService

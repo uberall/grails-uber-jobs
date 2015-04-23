@@ -3,7 +3,7 @@ package grails.plugin.uberjobs
 import grails.transaction.Transactional
 
 @Transactional(readOnly = true)
-class UberJobMetaController extends AbstractUberController {
+class UberJobsJobMetaController extends AbstractUberJobsController {
 
     static allowedMethods = [list: 'GET', get: 'GET', update: 'PUT']
 

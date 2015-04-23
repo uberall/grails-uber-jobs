@@ -2,7 +2,7 @@ package grails.plugin.uberjobs
 
 import org.springframework.http.HttpStatus
 
-class AbstractUberController {
+class AbstractUberJobsController {
 
     def uberJobsService
 
