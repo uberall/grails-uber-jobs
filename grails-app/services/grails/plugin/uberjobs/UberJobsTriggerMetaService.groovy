@@ -4,9 +4,9 @@ import grails.transaction.Transactional
 import org.joda.time.DateTime
 
 @Transactional
-class UberTriggerMetaService extends AbstractUberService {
+class UberJobsTriggerMetaService extends AbstractUberService {
 
-    def uberSchedulingService
+    def uberJobsSchedulingService
 
     def create(String name, UberJobMeta job, String cronExpression, String queueName, List arguments, boolean enabled, boolean failOnError = true) {
         UberTriggerMeta triggerMeta = new UberTriggerMeta(
@@ -20,7 +20,7 @@ class UberTriggerMetaService extends AbstractUberService {
         triggerMeta.arguments = arguments
         triggerMeta.save(failOnError: failOnError)
         if (triggerMeta) {
-            uberSchedulingService.updateThreadsNextExecution(triggerMeta.estimatedNextExecution)
+            uberJobsSchedulingService.updateThreadsNextExecution(triggerMeta.estimatedNextExecution)
         }
         triggerMeta
     }
@@ -47,7 +47,7 @@ class UberTriggerMetaService extends AbstractUberService {
             result = locked.save(failOnError: true, flush: true)
         }
         if (result) {
-            uberSchedulingService.updateThreadsNextExecution(triggerMeta.estimatedNextExecution)
+            uberJobsSchedulingService.updateThreadsNextExecution(triggerMeta.estimatedNextExecution)
         }
         result
     }

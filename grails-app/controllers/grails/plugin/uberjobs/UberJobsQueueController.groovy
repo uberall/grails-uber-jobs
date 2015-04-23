@@ -7,8 +7,7 @@ class UberJobsQueueController extends AbstractUberJobsController {
 
     static allowedMethods = [list: 'GET', get: 'GET', update: 'PUT', clear: 'GET', delete: 'DELETE']
 
-    // TODO: allowed methods
-    def uberQueueService
+    def uberJobsQueueService
 
     def list() {
         def list = UberQueue.createCriteria().list(params) {
@@ -36,7 +35,7 @@ class UberJobsQueueController extends AbstractUberJobsController {
             renderBadRequest([error: [enabled: 'INVALID']])
         } else {
             withDomainObject(UberQueue) { UberQueue uberQueue ->
-                renderResponse(queue: uberQueueService.update(uberQueue, json.enabled))
+                renderResponse(queue: uberJobsQueueService.update(uberQueue, json.enabled))
             }
         }
     }
@@ -44,7 +43,7 @@ class UberJobsQueueController extends AbstractUberJobsController {
     @Transactional(readOnly = false)
     def clear() {
         withDomainObject(UberQueue) {
-            uberQueueService.clear(it)
+            uberJobsQueueService.clear(it)
             renderResponse([queue: it])
         }
     }
@@ -53,7 +52,7 @@ class UberJobsQueueController extends AbstractUberJobsController {
     def delete() {
         withDomainObject(UberQueue) { uberQueue ->
             if (params.synchronous) {
-                uberQueueService.clear(uberQueue)
+                uberJobsQueueService.clear(uberQueue)
             } else {
                 // enqueue job to clear
             }

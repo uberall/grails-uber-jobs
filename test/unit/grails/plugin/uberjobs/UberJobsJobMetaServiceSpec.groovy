@@ -6,8 +6,8 @@ import spock.lang.Specification
 /**
  * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions
  */
-@TestFor(UberSchedulingService)
-class UberSchedulingServiceSpec extends Specification {
+@TestFor(UberJobsJobMetaService)
+class UberJobsJobMetaServiceSpec extends Specification {
 
     def setup() {
     }

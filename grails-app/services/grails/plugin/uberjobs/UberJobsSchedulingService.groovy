@@ -5,10 +5,10 @@ import org.joda.time.DateTime
 import org.springframework.dao.OptimisticLockingFailureException
 
 @Transactional
-class UberSchedulingService extends AbstractUberService {
+class UberJobsSchedulingService extends AbstractUberService {
 
     private static UberSchedulingThread schedulingThread
-    def uberJobsService
+    def uberJobsJobService
 
     def startThread() {
         if (schedulingThread != null) {
@@ -77,7 +77,7 @@ class UberSchedulingService extends AbstractUberService {
             trigger.lastFired = DateTime.now()
             trigger.save(flush: true)
             log.debug("enqueing $trigger.name")
-            uberJobsService.enqueue(trigger.job.job, trigger.arguments, trigger.queueName)
+            uberJobsJobService.enqueue(trigger.job.job, trigger.arguments, trigger.queueName)
         } catch (OptimisticLockingFailureException e) {
             log.info("it looks like another thread already handled $trigger.name, will do nothing")
         }

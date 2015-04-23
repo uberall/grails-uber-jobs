@@ -3,7 +3,7 @@ package grails.plugin.uberjobs
 import grails.transaction.Transactional
 
 @Transactional
-class UberWorkerMetaService extends AbstractUberService{
+class UberJobsWorkerMetaService extends AbstractUberService{
 
     def create(String poolName, int index, List<UberQueue> queues) {
         UberWorkerMeta workerMeta = new UberWorkerMeta(poolName: poolName, index: index, hostname: hostName, status:  UberWorkerMeta.Status.STARTING)

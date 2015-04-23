@@ -7,7 +7,7 @@ class UberJobsTriggerMetaController extends AbstractUberJobsController {
 
     static allowedMethods = [list: 'GET', get: 'GET', update: 'PUT', create: 'POST', delete: 'DELETE']
 
-    def uberTriggerMetaService
+    def uberJobsTriggerMetaService
 
     def list() {
         def list = UberTriggerMeta.list(params)
@@ -23,7 +23,7 @@ class UberJobsTriggerMetaController extends AbstractUberJobsController {
     @Transactional(readOnly = false)
     def update() {
         withDomainObject(UberTriggerMeta) { UberTriggerMeta triggerMeta ->
-            def result = uberTriggerMetaService.update(triggerMeta, request.JSON as Map)
+            def result = uberJobsTriggerMetaService.update(triggerMeta, request.JSON as Map)
             if (!result.validate()) {
                 renderErrorResponse(result)
             } else {
@@ -37,7 +37,7 @@ class UberJobsTriggerMetaController extends AbstractUberJobsController {
         def json = request.JSON
         UberJobMeta jobMeta = UberJobMeta.read(json.job)
         // TODO: check for validtiy
-        def result = uberTriggerMetaService.create(json.name, jobMeta, json.cronExpression, json.queueName, json.enabled, false)
+        def result = uberJobsTriggerMetaService.create(json.name, jobMeta, json.cronExpression, json.queueName, json.enabled, false)
         if (!result.validate()) {
             renderErrorResponse(result)
         } else {
@@ -48,7 +48,7 @@ class UberJobsTriggerMetaController extends AbstractUberJobsController {
     @Transactional(readOnly = false)
     def delete() {
         withDomainObject(UberTriggerMeta) { UberTriggerMeta triggerMeta ->
-            uberTriggerMetaService.delete(triggerMeta)
+            uberJobsTriggerMetaService.delete(triggerMeta)
             renderResponse([success: true])
         }
     }

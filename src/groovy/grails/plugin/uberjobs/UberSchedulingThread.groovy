@@ -6,11 +6,11 @@ import org.joda.time.DateTime
 @Log4j
 class UberSchedulingThread extends Thread {
 
-    UberSchedulingService uberSchedulingService
+    UberJobsSchedulingService uberSchedulingService
     boolean work = true
     DateTime waitTill = DateTime.now()
 
-    public UberSchedulingThread(UberSchedulingService uberSchedulingService) {
+    public UberSchedulingThread(UberJobsSchedulingService uberSchedulingService) {
         this.uberSchedulingService = uberSchedulingService
     }
 

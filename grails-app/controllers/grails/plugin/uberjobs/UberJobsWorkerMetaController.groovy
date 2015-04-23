@@ -2,8 +2,8 @@ package grails.plugin.uberjobs
 
 class UberJobsWorkerMetaController extends AbstractUberJobsController {
 
-    def uberWorkerService
-    def uberWorkerMetaService
+    def uberJobsWorkerService
+    def uberJobsWorkerMetaService
 
     def list() {
         def list = UberWorkerMeta.createCriteria().list(params) {
@@ -41,14 +41,14 @@ class UberJobsWorkerMetaController extends AbstractUberJobsController {
 
 
         def maxIndex = UberWorkerMeta.createCriteria().get {
-            eq('hostname', uberWorkerService.hostName)
+            eq('hostname', uberJobsWorkerService.hostName)
             eq('poolName', json.poolName)
             projections {
                 max('index')
             }
         }
         int newIndex = maxIndex != null ? maxIndex+1 : 0
-        def workerMeta = uberWorkerService.start(json.poolName, newIndex, queues)
+        def workerMeta = uberJobsWorkerService.start(json.poolName, newIndex, queues)
 
         renderResponse([worker: workerMeta])
     }

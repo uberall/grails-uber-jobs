@@ -4,11 +4,11 @@ import grails.transaction.Transactional
 import org.joda.time.DateTime
 
 @Transactional
-class UberJobsService extends AbstractUberService {
+class UberJobsJobService extends AbstractUberService {
 
-    def uberJobMetaService
-    def uberTriggerMetaService
-    def uberQueueService
+    def uberJobsJobMetaService
+    def uberJobsTriggerMetaService
+    def uberJobsQueueService
 
     def enqueue(String job, List arguments, String queue = null, DateTime at = DateTime.now()){
         def jobClass = grailsApplication.uberJobClasses.find{it.fullName == job}
@@ -19,7 +19,7 @@ class UberJobsService extends AbstractUberService {
     def enqueue(Class job, List arguments, String queue = null, DateTime at = DateTime.now()){
         def jobClass = grailsApplication.uberJobClasses.find{it.fullName == job.canonicalName}
         UberJobMeta jobMeta = UberJobMeta.findByJob(jobClass.fullName)
-        UberQueue uberQueue = uberQueueService.findOrCreate(queue ?: jobClass.defaultQueueName)
+        UberQueue uberQueue = uberJobsQueueService.findOrCreate(queue ?: jobClass.defaultQueueName)
         UberJob uberJob = new UberJob(
                 job: jobMeta,
                 queue: uberQueue,
@@ -65,7 +65,7 @@ class UberJobsService extends AbstractUberService {
             }.flatten()
             (namesFromDB - triggerNames).each { name ->
                 log.info "pruning information for TriggerMeta -> $name"
-                uberTriggerMetaService.delete(triggerList.find { it.name == name })
+                uberJobsTriggerMetaService.delete(triggerList.find { it.name == name })
             }
         }
     }
@@ -74,7 +74,7 @@ class UberJobsService extends AbstractUberService {
         UberQueue queue = UberQueue.findByName(queueName)
         if (!queue) {
             log.info "creating Queue $queueName"
-            uberQueueService.create(queueName)
+            uberJobsQueueService.create(queueName)
         }
     }
 
@@ -83,10 +83,10 @@ class UberJobsService extends AbstractUberService {
         log.debug("handling JobMeta for $job")
         UberJobMeta jobMeta = UberJobMeta.findByJob(name)
         if (!jobMeta) {
-            jobMeta = uberJobMetaService.create(name, true, job.minDelay, job.singletonJob)
+            jobMeta = uberJobsJobMetaService.create(name, true, job.minDelay, job.singletonJob)
             log.info("created JobMeta for $job")
         } else if (config.jobs.update) {
-            jobMeta = uberJobMetaService.update(jobMeta, [enabled: true, minDelay: job.minDelay, singletonJob: job.singletonJob])
+            jobMeta = uberJobsJobMetaService.update(jobMeta, [enabled: true, minDelay: job.minDelay, singletonJob: job.singletonJob])
             log.info("updated JobMeta for $job")
         }
 
@@ -97,10 +97,10 @@ class UberJobsService extends AbstractUberService {
             log.info("handling trigger $job.name -> $triggerName with settings: $settings")
             UberTriggerMeta triggerMeta = UberTriggerMeta.findByName(triggerName.toString())
             if (!triggerMeta) {
-                uberTriggerMetaService.create(triggerName.toString(), jobMeta, settings.cronExpression as String, settings.queueName as String, (settings.args ?: []) as List, true)
+                uberJobsTriggerMetaService.create(triggerName.toString(), jobMeta, settings.cronExpression as String, settings.queueName as String, (settings.args ?: []) as List, true)
             } else if (config.triggers.update) {
                 settings.enabled = true
-                uberTriggerMetaService.update(triggerMeta, settings)
+                uberJobsTriggerMetaService.update(triggerMeta, settings)
             }
         }
     }

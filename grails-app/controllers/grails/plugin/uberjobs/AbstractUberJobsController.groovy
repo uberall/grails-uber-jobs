@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus
 
 class AbstractUberJobsController {
 
-    def uberJobsService
+    def uberJobsJobService
 
     def beforeInterceptor = {
         if(!config.frontend.enabled){

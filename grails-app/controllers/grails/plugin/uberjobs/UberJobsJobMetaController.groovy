@@ -7,7 +7,7 @@ class UberJobsJobMetaController extends AbstractUberJobsController {
 
     static allowedMethods = [list: 'GET', get: 'GET', update: 'PUT']
 
-    def uberJobMetaService
+    def uberJobsJobMetaService
 
     def list() {
         def list = UberJobMeta.list(params)
@@ -23,7 +23,7 @@ class UberJobsJobMetaController extends AbstractUberJobsController {
     @Transactional(readOnly = false)
     def update() {
         withDomainObject(UberJobMeta) { UberJobMeta jobMeta ->
-            UberJobMeta result = uberJobMetaService.update(jobMeta, request.JSON as Map)
+            UberJobMeta result = uberJobsJobMetaService.update(jobMeta, request.JSON as Map)
             if(result.validate()) {
                 renderResponse(jobMeta: result)
             } else {

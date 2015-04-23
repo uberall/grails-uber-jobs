@@ -10,10 +10,10 @@ import org.springframework.web.context.WebApplicationContext
 import javax.servlet.ServletContext
 
 @Transactional
-class UberWorkerService extends AbstractUberService {
+class UberJobsWorkerService extends AbstractUberService {
 
-    def uberQueueService
-    def uberWorkerMetaService
+    def uberJobsQueueService
+    def uberJobsWorkerMetaService
 
     private static final List WORKERS = []
 
@@ -51,7 +51,7 @@ class UberWorkerService extends AbstractUberService {
             }
             def queues = []
             queueNames.each { name ->
-                queues << uberQueueService.findOrCreate(name.toString())
+                queues << uberJobsQueueService.findOrCreate(name.toString())
             }
             // start the appropiate amount of workers
             config.workers.times { int index ->
@@ -79,7 +79,7 @@ class UberWorkerService extends AbstractUberService {
     UberWorker start(String poolName, int index, List<UberQueue> queues) {
         UberWorkerMeta workerMeta = UberWorkerMeta.findByPoolNameAndHostnameAndIndex(poolName, hostName, index)
         if (!workerMeta) {
-            workerMeta = uberWorkerMetaService.create(poolName, index, queues)
+            workerMeta = uberJobsWorkerMetaService.create(poolName, index, queues)
         } else if (config.workers.update) {
             // TODO: UPDATE
         }
