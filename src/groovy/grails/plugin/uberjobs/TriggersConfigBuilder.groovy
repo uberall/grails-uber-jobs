@@ -1,11 +1,18 @@
 package grails.plugin.uberjobs
+
 /**
  * Source is mainly taken from the original jesque plugin for grails
  * https://github.com/michaelcameron/grails-jesque/blob/master/grails-jesque/src/groovy/grails/plugin/jesque/TriggersConfigBuilder.groovy
  */
 class TriggersConfigBuilder extends BuilderSupport {
+
     private Integer triggerNumber = 0
     private GrailsUberJobClass jobClass
+
+    private static final String TRIGGER_CRON_EXPRESSION = "cronExpression"
+    private static final String TRIGGER_QUEUE_NAME_FIELD = "queueName"
+    private static final String TRIGGER_QUEUE_ARGUMENTS = "args"
+    private static final String TRIGGER_NAME_FIELD = "name"
 
     def triggers = [:]
 
@@ -35,28 +42,28 @@ class TriggersConfigBuilder extends BuilderSupport {
     }
 
     protected Object createNode(name, Map attributes, Object value) {
-        def trigger = createTrigger(name, attributes, value)
+        def trigger = createTrigger(name, attributes)
         triggers[trigger.triggerAttributes.name] = trigger
         trigger
     }
 
     private prepareCommonTriggerAttributes(Map triggerAttributes) {
         // set trigger name
-        if (triggerAttributes[GrailsUberJobClassProperty.NAME] == null)
-            triggerAttributes[GrailsUberJobClassProperty.NAME] = "${jobClass.fullName}${triggerNumber++}"
+        if (triggerAttributes[TRIGGER_NAME_FIELD] == null)
+            triggerAttributes[TRIGGER_NAME_FIELD] = "${jobClass.fullName}${triggerNumber++}"
 
         // set trigger queue (if not specified, we simply use the jobs queue name
-        if (triggerAttributes[GrailsUberJobClassProperty.TRIGGER_QUEUE_NAME] == null) {
-            triggerAttributes[GrailsUberJobClassProperty.TRIGGER_QUEUE_NAME] = jobClass.defaultQueueName
+        if (triggerAttributes[TRIGGER_QUEUE_NAME_FIELD] == null) {
+            triggerAttributes[TRIGGER_QUEUE_NAME_FIELD] = jobClass.defaultQueueName
         }
 
         // set attributes
-        if (triggerAttributes[GrailsUberJobClassProperty.TRIGGER_QUEUE_ARGUMENTS] != null
-                && !(triggerAttributes[GrailsUberJobClassProperty.TRIGGER_QUEUE_ARGUMENTS] in List))
-            throw new Exception("If ${GrailsUberJobClassProperty.TRIGGER_QUEUE_ARGUMENTS} exists, it must be a list")
+        if (triggerAttributes[TRIGGER_QUEUE_ARGUMENTS] != null
+                && !(triggerAttributes[TRIGGER_QUEUE_ARGUMENTS] in List))
+            throw new Exception("If ${TRIGGER_QUEUE_ARGUMENTS} exists, it must be a list")
     }
 
-    public Expando createTrigger(name, Map attributes, value) {
+    public Expando createTrigger(name, Map attributes) {
         def triggerAttributes = new HashMap(attributes)
 
         prepareCommonTriggerAttributes(triggerAttributes)
@@ -75,10 +82,10 @@ class TriggersConfigBuilder extends BuilderSupport {
     }
 
     private def prepareCronTriggerAttributes(Map triggerAttributes) {
-        if (!triggerAttributes[GrailsUberJobClassProperty.CRON_EXPRESSION])
+        if (!triggerAttributes[TRIGGER_CRON_EXPRESSION])
             throw new Exception("Cron trigger must have 'cronExpression' attribute")
 
-        if (!CronExpression.isValidExpression(triggerAttributes[GrailsUberJobClassProperty.CRON_EXPRESSION].toString()))
-            throw new Exception("Cron expression '${triggerAttributes[GrailsUberJobClassProperty.CRON_EXPRESSION]}' in the job class ${jobClass.fullName} is not a valid cron expression")
+        if (!CronExpression.isValidExpression(triggerAttributes[TRIGGER_CRON_EXPRESSION].toString()))
+            throw new Exception("Cron expression '${triggerAttributes[TRIGGER_CRON_EXPRESSION]}' in the job class ${jobClass.fullName} is not a valid cron expression")
     }
 }
