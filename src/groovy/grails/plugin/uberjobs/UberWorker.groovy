@@ -148,23 +148,21 @@ class UberWorker implements Runnable {
 
             while (idle) {
                 curQueue = queueNames.poll()
-                if (curQueue) {
-                    queueNames.add(curQueue) // Rotate the queues
-                    checkPaused()
+                queueNames.add(curQueue) // Rotate the queues
+                checkPaused()
 
-                    // Might have been waiting in poll()/checkPaused() for a while, so check the state again
-                    if (idle) {
-                        UberJob job = pop(curQueue)
+                // Might have been waiting in poll()/checkPaused() for a while, so check the state again
+                if (idle) {
+                    UberJob job = pop(curQueue)
 
-                        if (job) {
-                            process(job, curQueue)
-                            missCount = 0
-                        } else if (++missCount >= queueNames.size() && idle) {
-                            // Keeps worker from busy-spinning on empty queues
-                            missCount = 0
-                            log.trace("no more work, sleeping ...")
-                            Thread.sleep(EMPTY_QUEUE_SLEEP_TIME)
-                        }
+                    if (job) {
+                        process(job, curQueue)
+                        missCount = 0
+                    } else if (++missCount >= queueNames.size() && idle) {
+                        // Keeps worker from busy-spinning on empty queues
+                        missCount = 0
+                        log.trace("no more work, sleeping ...")
+                        Thread.sleep(EMPTY_QUEUE_SLEEP_TIME)
                     }
                 }
             }
