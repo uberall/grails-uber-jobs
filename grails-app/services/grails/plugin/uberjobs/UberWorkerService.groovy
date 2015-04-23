@@ -1,6 +1,13 @@
 package grails.plugin.uberjobs
 
 import grails.transaction.Transactional
+import grails.util.GrailsWebUtil
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
+import org.springframework.web.context.WebApplicationContext
+
+import javax.servlet.ServletContext
 
 @Transactional
 class UberWorkerService extends AbstractUberService {
@@ -133,6 +140,19 @@ class UberWorkerService extends AbstractUberService {
         new Thread(worker, worker.getName()).start()
 
         worker
+    }
+
+    /**
+     * Sets the locale to the configured value.
+     * Like this, we can resolve messages in jobs.
+     */
+    private static void addRequestContext() {
+        Locale.setDefault(Locale.GERMANY)
+        ServletContext servletContext = ServletContextHolder.getServletContext()
+        WebApplicationContext ctx = servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT) as WebApplicationContext
+        GrailsWebRequest req = GrailsWebUtil.bindMockWebRequest(ctx)
+        // lets set the preferredLocale to the default locale, as we use this to set locales in jobs
+        req.currentRequest.addPreferredLocale(Locale.default)
     }
 
 }
