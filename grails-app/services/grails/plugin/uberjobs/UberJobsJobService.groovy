@@ -19,6 +19,10 @@ class UberJobsJobService extends AbstractUberJobsService {
     def enqueue(Class job, List arguments, String queue = null, DateTime at = DateTime.now()){
         def jobClass = grailsApplication.uberJobClasses.find{it.fullName == job.canonicalName}
         UberJobMeta jobMeta = UberJobMeta.findByJob(jobClass.fullName)
+        if (jobMeta.singletonJob && isSingletonAlreadyEnqueued(jobMeta)) {
+            log.debug("not enqueueing singleton job $job.simpleName, as another job is already enqueued")
+            return null
+        }
         UberQueue uberQueue = uberJobsQueueService.findOrCreate(queue ?: jobClass.defaultQueueName)
         UberJob uberJob = new UberJob(
                 job: jobMeta,
@@ -103,6 +107,10 @@ class UberJobsJobService extends AbstractUberJobsService {
                 uberJobsTriggerMetaService.update(triggerMeta, settings)
             }
         }
+    }
+
+    private static boolean isSingletonAlreadyEnqueued(UberJobMeta meta) {
+        UberJob.countByJobAndStatusInList(meta, [UberJob.Status.OPEN, UberJob.Status.WORKING]) as boolean
     }
 
 }

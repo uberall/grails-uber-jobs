@@ -33,7 +33,7 @@ class UberJobsJobController extends AbstractUberJobsController {
             return
         }
         def result = uberJobsJobService.enqueue(json.job.toString(), json.args as List)
-        renderResponse([succes: result.validate()])
+        renderResponse([succes: result?.validate()])
     }
 
     def delete() {
