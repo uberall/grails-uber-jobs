@@ -23,6 +23,7 @@ class UberJobsGrailsPlugin {
     def description = '''\
 Brief summary/description of the plugin.
 '''
+    def dependsOn = ['hibernate4': '*']
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/uber-jobs"
