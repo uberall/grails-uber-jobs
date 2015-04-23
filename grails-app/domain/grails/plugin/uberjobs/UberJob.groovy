@@ -10,6 +10,11 @@ import org.joda.time.DateTime
 class UberJob implements UberApiResponseObject {
 
     /**
+     * The triggers that belong to this job
+     */
+    static hasMany = [triggers: UberTriggerMeta]
+
+    /**
      * Every item belongs into a Queue
      */
     static belongsTo = [queue: UberQueue]
