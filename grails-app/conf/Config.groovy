@@ -28,13 +28,17 @@ grails {
             // generic worker pool
             genericPool {
                 workers = 3
-                queueNames = ["testJobQueue", "TestQueue"]
-//                queueNames = ["one", "two", "three", "four", "five"]
+                queueNames = ["testJobQueue", "TestQueue", "test-queue"]
             }
             // only working on jobs that use a browser; 1 worker ensures that we don't try to create 2 browsers at the same time.
             usingBrowserPool {
                 workers = -1
                 queueNames = ['testJobQueue', 'scheduledTestQueue']
+            }
+        }
+        scheduling {
+            thread {
+                active = true
             }
         }
     }

@@ -95,9 +95,9 @@ class UberJobsService extends AbstractUberService {
         triggers.each { triggerName, settingsExpando ->
             Map settings = settingsExpando.getProperty('triggerAttributes')
             log.info("handling trigger $job.name -> $triggerName with settings: $settings")
-            UberTriggerMeta triggerMeta = UberTriggerMeta.findByName(triggerName)
+            UberTriggerMeta triggerMeta = UberTriggerMeta.findByName(triggerName.toString())
             if (!triggerMeta) {
-                uberTriggerMetaService.create(triggerName, jobMeta, settings.cronExpression, settings.queueName, true)
+                uberTriggerMetaService.create(triggerName.toString(), jobMeta, settings.cronExpression as String, settings.queueName as String, (settings.args ?: []) as List, true)
             } else if (config.triggers.update) {
                 settings.enabled = true
                 uberTriggerMetaService.update(triggerMeta, settings)

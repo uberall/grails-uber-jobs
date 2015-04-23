@@ -89,6 +89,7 @@ Brief summary/description of the plugin.
                 }
             }
         }
+
     }
 
     def configureJobBeans = { GrailsUberJobClass jobClass ->
@@ -115,6 +116,8 @@ Brief summary/description of the plugin.
         // AFTER SPRING CONTEXT IS INITIALIZED
         ctx.uberJobsService.init()
         ctx.uberWorkerService.createWorkersFromConfig()
+        if(ctx.grailsApplication.config.grails.uberjobs.scheduling.thread.active)
+            ctx.uberSchedulingService.startThread()
     }
 
     def onChange = { event ->
@@ -129,8 +132,11 @@ Brief summary/description of the plugin.
     }
 
     def onShutdown = { event ->
-        if (application.config.grails.uberjobs.waitForJobsOnShutdown)
+        def configuration = application.config.grails.uberjobs
+        if (configuration.waitForJobsOnShutdown)
             application.mainContext.uberWorkerService.shutdown()
+        if(configuration.scheduling.thread.active)
+        application.mainContext.uberSchedulingService.stopThread()
     }
 
     private static boolean isPluginEnabled(def application) {

@@ -322,7 +322,7 @@ class UberWorker implements Runnable {
     protected UberJob pop(UberQueue queue) {
         UberJob job = null
 
-        log.debug("popping from queue $queue.name")
+        log.trace("popping from queue $queue.name")
 
         try {
             job = UberJob.findByStatusAndQueueAndDoAtLessThan(UberJob.Status.OPEN, queue, DateTime.now())

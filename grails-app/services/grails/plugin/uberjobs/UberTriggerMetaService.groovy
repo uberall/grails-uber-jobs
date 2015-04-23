@@ -6,7 +6,9 @@ import org.joda.time.DateTime
 @Transactional
 class UberTriggerMetaService extends AbstractUberService {
 
-    def create(String name, UberJobMeta job, String cronExpression, String queueName, boolean enabled, boolean failOnError = true) {
+    def uberSchedulingService
+
+    def create(String name, UberJobMeta job, String cronExpression, String queueName, List arguments, boolean enabled, boolean failOnError = true) {
         UberTriggerMeta triggerMeta = new UberTriggerMeta(
                 name: name,
                 job: job,
@@ -15,7 +17,11 @@ class UberTriggerMetaService extends AbstractUberService {
                 enabled: enabled,
                 lastFired: DateTime.now()
         )
+        triggerMeta.arguments = arguments
         triggerMeta.save(failOnError: failOnError)
+        if (triggerMeta) {
+            uberSchedulingService.updateThreadsNextExecution(triggerMeta.estimatedNextExecution)
+        }
         triggerMeta
     }
 
@@ -32,14 +38,21 @@ class UberTriggerMetaService extends AbstractUberService {
             if (updateParams.enabled != null) {
                 locked.enabled = updateParams.enabled
             }
-            if(updateParams.name){
+            if (updateParams.name) {
                 locked.name = updateParams.name
+            }
+            if (updateParams.arguments) {
+                triggerMeta.arguments = updateParams.arguments
             }
             result = locked.save(failOnError: true, flush: true)
         }
+        if (result) {
+            uberSchedulingService.updateThreadsNextExecution(triggerMeta.estimatedNextExecution)
+        }
+        result
     }
 
-    def delete(UberTriggerMeta triggerMeta){
+    def delete(UberTriggerMeta triggerMeta) {
         triggerMeta.job.removeFromTriggers(triggerMeta)
         triggerMeta.delete()
     }
