@@ -17,6 +17,7 @@ grails {
         jobs {
             update = true // enable updating JobMeta on application startup
             cleanup = true // enable pruning JobMeta of Jobs that are not found in code anymore
+            requestContextLocale = Locale.GERMANY
         }
         triggers {
             update = true // enable updating TriggerMeta on application startup

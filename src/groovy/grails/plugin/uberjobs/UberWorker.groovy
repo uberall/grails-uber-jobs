@@ -1,8 +1,15 @@
 package grails.plugin.uberjobs
 
+import grails.util.GrailsWebUtil
 import groovy.util.logging.Log4j
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.joda.time.DateTime
 import org.springframework.dao.OptimisticLockingFailureException
+import org.springframework.web.context.WebApplicationContext
+
+import javax.servlet.ServletContext
 
 /**
  * A worker is a Thread that polls queues and processes jobs by calling a jobs perform method.
@@ -16,6 +23,7 @@ class UberWorker implements Runnable {
     protected String name
     protected UberWorkerMeta workerMeta
     protected PollMode pollMode
+    protected Locale locale
     protected boolean paused = false
     protected static final long EMPTY_QUEUE_SLEEP_TIME = 1000 // 1 second
 
@@ -79,6 +87,10 @@ class UberWorker implements Runnable {
         try {
             threadRef = Thread.currentThread()
             workerMeta.status = UberWorkerMeta.Status.IDLE
+
+            if (locale) {
+                setRequestContextLocale(locale)
+            }
 
             // start polling the queues
             switch (pollMode) {
@@ -361,6 +373,18 @@ class UberWorker implements Runnable {
     @Override
     public String toString() {
         return getName()
+    }
+
+    /**
+     * Sets the locale for the current thread to the specified value.
+     * Like this, we can resolve messages in jobs.
+     */
+    private static void setRequestContextLocale(Locale locale) {
+        Locale.setDefault(locale)
+        ServletContext servletContext = ServletContextHolder.getServletContext()
+        WebApplicationContext ctx = servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT) as WebApplicationContext
+        GrailsWebRequest req = GrailsWebUtil.bindMockWebRequest(ctx)
+        req.currentRequest.addPreferredLocale(Locale.default)
     }
 
 }

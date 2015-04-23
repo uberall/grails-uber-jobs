@@ -121,6 +121,11 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             log.warn('The specified job throwable handler class does not implement UberJobThrowableHandler. Ignoring it')
         }
 
+        Locale locale = grailsApplication.config.grails.uberjobs.jobs.requestContextLocale
+        if (locale) {
+            worker.locale = locale
+        }
+
         // add custom listener if specified (not implemented yet)
 //        def customListenerClass = grailsApplication.config.grails.uberjobs.listener
 //        if (customListenerClass && customListenerClass in UberWorkerListener) {
@@ -144,19 +149,6 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         new Thread(worker, worker.getName()).start()
 
         worker
-    }
-
-    /**
-     * Sets the locale to the configured value.
-     * Like this, we can resolve messages in jobs.
-     */
-    private static void addRequestContext() {
-        Locale.setDefault(Locale.GERMANY)
-        ServletContext servletContext = ServletContextHolder.getServletContext()
-        WebApplicationContext ctx = servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT) as WebApplicationContext
-        GrailsWebRequest req = GrailsWebUtil.bindMockWebRequest(ctx)
-        // lets set the preferredLocale to the default locale, as we use this to set locales in jobs
-        req.currentRequest.addPreferredLocale(Locale.default)
     }
 
 }
