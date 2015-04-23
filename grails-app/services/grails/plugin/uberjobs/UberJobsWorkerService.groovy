@@ -10,7 +10,7 @@ import org.springframework.web.context.WebApplicationContext
 import javax.servlet.ServletContext
 
 @Transactional
-class UberJobsWorkerService extends AbstractUberService {
+class UberJobsWorkerService extends AbstractUberJobsService {
 
     def uberJobsQueueService
     def uberJobsWorkerMetaService

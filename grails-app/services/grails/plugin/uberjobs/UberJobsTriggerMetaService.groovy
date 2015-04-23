@@ -4,7 +4,7 @@ import grails.transaction.Transactional
 import org.joda.time.DateTime
 
 @Transactional
-class UberJobsTriggerMetaService extends AbstractUberService {
+class UberJobsTriggerMetaService extends AbstractUberJobsService {
 
     def uberJobsSchedulingService
 

@@ -1,6 +1,6 @@
 package grails.plugin.uberjobs
 
-abstract class AbstractUberService {
+abstract class AbstractUberJobsService {
 
     def grailsApplication
 

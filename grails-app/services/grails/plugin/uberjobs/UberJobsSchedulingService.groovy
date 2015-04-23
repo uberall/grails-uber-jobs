@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import org.springframework.dao.OptimisticLockingFailureException
 
 @Transactional
-class UberJobsSchedulingService extends AbstractUberService {
+class UberJobsSchedulingService extends AbstractUberJobsService {
 
     private static UberSchedulingThread schedulingThread
     def uberJobsJobService

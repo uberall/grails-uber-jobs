@@ -4,7 +4,7 @@ import grails.transaction.Transactional
 import org.joda.time.DateTime
 
 @Transactional
-class UberJobsQueueService extends AbstractUberService {
+class UberJobsQueueService extends AbstractUberJobsService {
 
     def findOrCreate(String name){
         def result = UberQueue.findByName(name)

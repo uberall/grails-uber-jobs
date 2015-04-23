@@ -3,7 +3,7 @@ package grails.plugin.uberjobs
 import grails.transaction.Transactional
 
 @Transactional
-class UberJobsJobMetaService extends AbstractUberService {
+class UberJobsJobMetaService extends AbstractUberJobsService {
 
     def create(String job, boolean enabled, int minDelay, boolean singletonJob, failOnError = true) {
         UberJobMeta result = new UberJobMeta(job: job, enabled: enabled, minDelay: minDelay, singletonJob: singletonJob)
