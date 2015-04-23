@@ -7,7 +7,7 @@ grails.app.context = '/'
 grails {
     uberjobs {
         enabled = true // enable the plugin itself
-        waitForJobsOnShutdown = true // whether or not wait for jobs to finish on shutdown
+        waitForWorkersOnShutdown = true // waits for jobs to finish on shutdown
         pollMode = PollMode.ROUND_ROBIN // the poll mode for all workers (see PollMode enum for more information)
         frontend {
             enabled = true

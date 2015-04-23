@@ -130,10 +130,10 @@ Brief summary/description of the plugin.
 
     def onShutdown = { event ->
         def configuration = application.config.grails.uberjobs
-        if (configuration.waitForJobsOnShutdown)
+        if (configuration.waitForWorkersOnShutdown)
             application.mainContext.uberJobsWorkerService.shutdown()
-        if(configuration.scheduling.thread.active)
-        application.mainContext.uberJobsSchedulingService.stopThread()
+        if (configuration.scheduling.thread.active)
+            application.mainContext.uberJobsSchedulingService.stopThread()
     }
 
     private static boolean isPluginEnabled(def application) {

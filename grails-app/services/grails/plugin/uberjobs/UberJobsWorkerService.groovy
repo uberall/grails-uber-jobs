@@ -60,18 +60,16 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         }
     }
 
-    def shutdown(){
-        log.info("Shutting down ${UberWorkerMeta.countByHostnameAndStatusNotEqual(hostName, UberWorkerMeta.Status.STOPPED)}")
-        WORKERS.each { worker ->
-            //TODO: it.stop()
+    void shutdown() {
+        log.info("Shutting down ${UberWorkerMeta.countByHostnameAndStatusNotEqual(hostName, UberWorkerMeta.Status.STOPPED)} workers ")
+        WORKERS.each { UberWorker worker ->
+            worker.stop(true)
         }
-        boolean allDone = false
         int attempts = 10
-        while(!allDone){
+        while (attempts > 0){
             sleep(1000)
             int notStopped = UberWorkerMeta.countByHostnameAndStatusNotEqual(hostName, UberWorkerMeta.Status.STOPPED)
-            log.info("Shutdown attempt ${attempts-9} of $attempts -> $notStopped Workers has not beed stopped by now.")
-            allDone = notStopped == 0 || attempts == 1
+            log.info("waiting for all workers to finish ... $attempts tries left -> $notStopped workers are not stopped yet.")
             attempts--
         }
     }
