@@ -14,6 +14,11 @@ class UberWorkerMeta implements UberApiResponseObject {
     static hasMany = [queues: UberQueue]
 
     /**
+     * We want this to be ordered.
+     */
+    List queues
+
+    /**
      * the hostname this worker is working on
      */
     String hostname

@@ -1,15 +1,8 @@
 package grails.plugin.uberjobs
 
 import groovy.util.logging.Log4j
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.joda.time.DateTime
 import org.springframework.dao.OptimisticLockingFailureException
-
-import java.util.concurrent.BlockingDeque
-import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * A worker is a Thread that polls queues and processes jobs by calling a jobs perform method.
@@ -17,96 +10,14 @@ import java.util.concurrent.atomic.AtomicReference
 @Log4j
 class UberWorker implements Runnable {
 
-    private GrailsApplication grailsApplication
-    protected JobThrowableHandler jobThrowableHandler
-    protected BlockingDeque<UberQueue> queueNames = new LinkedBlockingDeque<UberQueue>()
-    private AtomicReference<Thread> threadRef = new AtomicReference<Thread>(null)
-    private String name
-    private final AtomicBoolean paused = new AtomicBoolean(false)
-    private UberWorkerMeta workerMeta
-    private PollMode pollMode
+    protected UberJobThrowableHandler jobThrowableHandler
+    protected LinkedList<UberQueue> queueNames = new LinkedList<UberQueue>()
+    protected Thread threadRef
+    protected String name
+    protected UberWorkerMeta workerMeta
+    protected PollMode pollMode
+    protected boolean paused = false
     protected static final long EMPTY_QUEUE_SLEEP_TIME = 1000 // 1 second
-
-    /**
-     * Polls the queues for jobs in a drain-queue fashion and executes them.
-     */
-    protected void pollDrainQueue() {
-        while (workerMeta.status == UberWorkerMeta.Status.IDLE) {
-            boolean worked = false
-
-            try {
-                queueNames.each { UberQueue curQueue ->
-                    if (!worked) {
-                        checkPaused()
-
-                        // Might have been waiting in poll()/checkPaused() for a while
-                        if (workerMeta.status == UberWorkerMeta.Status.IDLE) {
-                            UberJob job = pop(curQueue)
-
-                            if (job != null) {
-                                process(job, curQueue)
-                                worked = true
-                            }
-                        }
-                    }
-                }
-
-                if (!worked) {
-                    log.trace("no more work, sleeping ...")
-                    Thread.sleep(EMPTY_QUEUE_SLEEP_TIME)
-                }
-            } catch (InterruptedException ignore) {
-                if (!isShutdown()) {
-                    log.error("worker $name has been interrupted but has not been shutdown!")
-                }
-            } catch (Throwable t) {
-                log.error("error in worker $name", t)
-            }
-        }
-    }
-
-    /**
-     * Polls the queues for jobs in a round-robin fashion and executes them.
-     */
-    protected void pollRoundRobin() {
-        int missCount = 0
-        UberQueue curQueue
-
-        while (workerMeta.status == UberWorkerMeta.Status.IDLE) {
-            try {
-                curQueue = queueNames.poll(EMPTY_QUEUE_SLEEP_TIME, TimeUnit.MILLISECONDS)
-                if (curQueue != null) {
-                    queueNames.add(curQueue) // Rotate the queues
-                    checkPaused()
-
-                    // Might have been waiting in poll()/checkPaused() for a while, so check the state again
-                    if (workerMeta.status == UberWorkerMeta.Status.IDLE) {
-                        UberJob job = pop(curQueue)
-
-                        if (job != null) {
-                            process(job, curQueue)
-                            missCount = 0
-                        } else if (++missCount >= queueNames.size() && workerMeta.status == UberWorkerMeta.Status.IDLE) {
-                            // Keeps worker from busy-spinning on empty queues
-                            missCount = 0
-                            log.trace("no more work, sleeping ...")
-                            Thread.sleep(EMPTY_QUEUE_SLEEP_TIME)
-                        }
-                    }
-                }
-            } catch (InterruptedException ignore) {
-                if (!isShutdown()) {
-                    log.error("worker $name has been interrupted but has not been shutdown!")
-                }
-            } catch (Throwable t) {
-                log.error("error in worker $name", t)
-            }
-        }
-    }
-
-    protected void pollRandom() {
-        // TODO: implement
-    }
 
     /**
      * Creates a new UberWorker.
@@ -114,15 +25,25 @@ class UberWorker implements Runnable {
      *
      * @param queues the list of queues to poll
      * @param workerMeta the UberWorkerMeta that holds information about this worker
-     * @param grailsApplication the grailsApplication (to get references to beans)
+     * @param pollMode the poll mode this worker should use to poll the queues
      * @throws IllegalArgumentException if queues is null
      */
-    public UberWorker(Collection<UberQueue> queues, UberWorkerMeta workerMeta, GrailsApplication grailsApplication, PollMode pollMode) {
+    public UberWorker(Collection<UberQueue> queues, UberWorkerMeta workerMeta, PollMode pollMode) {
         setQueues(queues)
         this.workerMeta = workerMeta
-        this.grailsApplication = grailsApplication
         this.pollMode = pollMode
         workerMeta.status = UberWorkerMeta.Status.STARTING
+    }
+
+    /**
+     * Sets the queues this worker should grab jobs from.
+     *
+     * @param queues the queues
+     */
+    protected void setQueues(Collection<UberQueue> queues) {
+        checkQueues(queues)
+        queueNames.clear()
+        queueNames.addAll(queues)
     }
 
     /**
@@ -130,7 +51,7 @@ class UberWorker implements Runnable {
      *
      * @param queues the given queues
      */
-    protected static void checkQueues(final Iterable<UberQueue> queues) {
+    protected static void checkQueues(Iterable<UberQueue> queues) {
         if (queues == null) {
             throw new IllegalArgumentException("queues must not be null")
         }
@@ -153,10 +74,10 @@ class UberWorker implements Runnable {
             throw new IllegalStateException("This UberWorker is already running!")
         }
 
-        log.info("spinning up worker thread ...")
+        log.info("spinning up worker thread")
 
         try {
-            this.threadRef.set(Thread.currentThread())
+            threadRef = Thread.currentThread()
             workerMeta.status = UberWorkerMeta.Status.IDLE
 
             // start polling the queues
@@ -171,28 +92,108 @@ class UberWorker implements Runnable {
                     pollRandom()
                     break
                 default:
-                    // should not happen, as we check the poll mode in the constructor
                     throw new IllegalArgumentException("unknown poll mode: $pollMode")
             }
         } finally {
-            log.info("worker thread stopped ...")
-            this.threadRef.set(null)
+            log.info("worker thread stopped")
+            threadRef = null
         }
     }
 
     /**
-     * Shutdown this Worker.<br>
-     * <b>The worker cannot be started again; create a new worker in this
-     * case.</b>
+     * Polls the queues for jobs in a drain-queue fashion.
+     */
+    protected void pollDrainQueue() {
+        try {
+            while (idle) {
+                boolean worked = false
+                queueNames.each { UberQueue curQueue ->
+                    if (!worked) {
+                        checkPaused()
+
+                        // Might have been waiting in poll()/checkPaused() for a while
+                        if (idle) {
+                            UberJob job = pop(curQueue)
+
+                            if (job) {
+                                process(job, curQueue)
+                                worked = true
+                            }
+                        }
+                    }
+                }
+
+                if (!worked) {
+                    log.trace("no more work, sleeping ...")
+                    Thread.sleep(EMPTY_QUEUE_SLEEP_TIME)
+                }
+            }
+        } catch (InterruptedException ignore) {
+            if (!stopped) {
+                log.error("worker $name has been interrupted but has not been stopped!")
+            }
+        } catch (Throwable t) {
+            log.error("error in worker $name", t)
+            setWorkerStatus(UberWorkerMeta.Status.STOPPED)
+        }
+    }
+
+    /**
+     * Polls the queues for jobs in a round-robin fashion.
+     */
+    protected void pollRoundRobin() {
+        try {
+            int missCount = 0
+            UberQueue curQueue
+
+            while (idle) {
+                curQueue = queueNames.poll()
+                if (curQueue) {
+                    queueNames.add(curQueue) // Rotate the queues
+                    checkPaused()
+
+                    // Might have been waiting in poll()/checkPaused() for a while, so check the state again
+                    if (idle) {
+                        UberJob job = pop(curQueue)
+
+                        if (job) {
+                            process(job, curQueue)
+                            missCount = 0
+                        } else if (++missCount >= queueNames.size() && idle) {
+                            // Keeps worker from busy-spinning on empty queues
+                            missCount = 0
+                            log.trace("no more work, sleeping ...")
+                            Thread.sleep(EMPTY_QUEUE_SLEEP_TIME)
+                        }
+                    }
+                }
+            }
+        } catch (InterruptedException ignore) {
+            if (!stopped) {
+                log.error("worker $name has been interrupted but has not been stopped!")
+            }
+        } catch (Throwable t) {
+            log.error("error in worker $name", t)
+            setWorkerStatus(UberWorkerMeta.Status.STOPPED)
+        }
+    }
+
+    protected void pollRandom() {
+        // TODO: implement
+        throw new UnsupportedOperationException("random poll mode is not yet implemented!")
+    }
+
+    /**
+     * Stop this Worker.
+     * The worker cannot be started again; create a new worker in this case.
      *
      * @param now if true, an effort will be made to stop any job in progress
      */
     void end(final boolean now) {
-        workerMeta.status = UberWorkerMeta.Status.STOPPED
+        setWorkerStatus(UberWorkerMeta.Status.STOPPED)
 
         if (now) {
-            workerMeta.status = UberWorkerMeta.Status.STOPPED
-            final Thread workerThread = this.threadRef.get()
+            Thread workerThread = threadRef
             if (workerThread != null) {
                 workerThread.interrupt()
             }
@@ -209,55 +210,41 @@ class UberWorker implements Runnable {
      */
     protected void process(UberJob job, UberQueue curQueue) {
         try {
-            log.debug("processing job $job, worker is now WORKING")
-            workerMeta.status = UberWorkerMeta.Status.WORKING
-            workerMeta.save()
+            log.debug("processing job $job.id, worker is now WORKING")
+            setWorkerStatus(UberWorkerMeta.Status.WORKING)
 
             // get an instance of the job bean ...
             def instance = job.job.jobBean
+
             // ... and execute it
-            execute(job, instance, job.arguments)
+            instance.perform(* job.arguments)
+            success(job)
         } catch (Throwable t) {
             failure(t, job, curQueue)
         } finally {
-            log.debug("processing job $job finished, worker is now IDLE")
-            workerMeta.status = UberWorkerMeta.Status.IDLE
-            workerMeta.save()
+            log.debug("processing job $job.id finished, worker is now IDLE")
+            setWorkerStatus(UberWorkerMeta.Status.IDLE)
         }
-    }
-
-    /**
-     * Executes the given queue item.
-     *
-     * @param job the Job to execute
-     * @param instance the job bean
-     * @param args the arguments to pass to the jobs perform method
-     */
-    protected void execute(UberJob job, Object instance, List args) {
-        instance.perform(* args)
-        success(job)
     }
 
     /**
      * Called when we successfully executed a job.
      *
-     * @param job the Job that succeeded
+     * @param job the UberJob that succeeded
      */
     protected void success(UberJob job) {
-        log.debug("job $job was successful! setting status to SUCCESSFUL")
         job.status = UberJob.Status.SUCCESSFUL
         job.save()
     }
 
     /**
-     * Called when the job we execute throws an exception.
+     * Called when the job we executed threw an throwable.
      *
-     * @param ex the exception
-     * @param job the job that was executed
-     * @param curQueue the current queue
+     * @param t the throwable
+     * @param job the UberJob that was executed
+     * @param curQueue the current queue we worked on
      */
     protected void failure(Throwable t, UberJob job, UberQueue curQueue) {
-        log.debug("job $job failed! setting status to FAILED and calling throwable handler", t)
         jobThrowableHandler?.onThrowable(t, job, curQueue)
         job.status = UberJob.Status.FAILED
         job.save()
@@ -274,11 +261,11 @@ class UberWorker implements Runnable {
     }
 
     /**
-     * Returns true if this worker has been shutdown.
+     * Returns true if this worker has been stopped.
      *
      * @return
      */
-    boolean isShutdown() {
+    boolean isStopped() {
         return workerMeta.status == UberWorkerMeta.Status.STOPPED
     }
 
@@ -288,16 +275,25 @@ class UberWorker implements Runnable {
      * @return
      */
     boolean isPaused() {
-        return paused.get()
+        return paused
     }
 
     /**
-     * Returns true if this worker is currently processing a job.
+     * Returns true if this worker is currently processing a job (aka WORKING).
      *
      * @return
      */
     boolean isProcessingJob() {
         return workerMeta.status == UberWorkerMeta.Status.WORKING
+    }
+
+    /**
+     * Returns true if this worker is currently not processing a job (aka IDLE).
+     *
+     * @return
+     */
+    boolean isIdle() {
+        return workerMeta.status == UberWorkerMeta.Status.IDLE
     }
 
     void togglePause(boolean paused) {
@@ -315,19 +311,6 @@ class UberWorker implements Runnable {
         return Collections.unmodifiableCollection(this.queueNames)
     }
 
-    protected void setQueues(Collection<UberQueue> queues) {
-        checkQueues(queues)
-        queueNames.clear()
-        queueNames.addAll(queues)
-    }
-
-//    public void join(final long millis) throws InterruptedException {
-//        final Thread workerThread = this.threadRef.get()
-//        if (workerThread != null && workerThread.isAlive()) {
-//            workerThread.join(millis)
-//        }
-//    }
-
     /**
      * Pops a job from the given queue.
      * Uses optimistic locking to check if another worked grabbed the job in between and returns null in that case.
@@ -339,16 +322,18 @@ class UberWorker implements Runnable {
     protected UberJob pop(UberQueue queue) {
         UberJob job = null
 
+        log.debug("popping from queue $queue.name")
+
         try {
             job = UberJob.findByStatusAndQueueAndDoAtLessThan(UberJob.Status.OPEN, queue, DateTime.now())
             if (job) {
-                log.debug("marking job $job.id as WORKING")
                 job.status = UberJob.Status.WORKING
                 job.save()
+                log.debug("popped job from queue $queue.name")
             }
         } catch (OptimisticLockingFailureException ignore) {
-            log.debug("another worker already popped job $job.id, trying again ...")
-            job = null
+            log.debug("another worker already popped job $job.id, trying queue $queue.name again ...")
+            return pop(queue)
         }
 
         return job
@@ -358,18 +343,21 @@ class UberWorker implements Runnable {
      * Checks to see if worker is paused. If so, wait until unpaused.
      */
     protected void checkPaused() {
-        if (this.paused.get()) {
-            synchronized (this.paused) {
-                while (this.paused.get()) {
-                    try {
-                        log.debug("now waiting in checkPaused")
-                        this.paused.wait()
-                    } catch (InterruptedException ie) {
-                        log.warn("Worker interrupted in checkPaused", ie)
-                    }
+        if (paused) {
+            while (paused) {
+                try {
+                    log.debug("now waiting in checkPaused")
+                    paused.wait()
+                } catch (InterruptedException ie) {
+                    log.warn("Worker interrupted in checkPaused", ie)
                 }
             }
         }
+    }
+
+    protected void setWorkerStatus(UberWorkerMeta.Status status) {
+        workerMeta.status = status
+        workerMeta.save()
     }
 
     @Override

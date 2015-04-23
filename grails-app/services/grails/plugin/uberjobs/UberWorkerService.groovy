@@ -91,37 +91,31 @@ class UberWorkerService extends AbstractUberService {
 
         // use custom worker class if specified
         UberWorker worker
-        def customWorkerClass = grailsApplication.config.grails.uberjobs.custom.worker.clazz
+        def customWorkerClass = grailsApplication.config.grails.uberjobs.worker
         if (customWorkerClass && customWorkerClass in UberWorker) {
+            log.info("using ${customWorkerClass.class} as worker")
             worker = customWorkerClass.newInstance(queues)
         } else {
             if (customWorkerClass)
                 log.warn('The specified custom worker class does not extend UberWorker. Ignoring it')
-            worker = new UberWorker(queues, workerMeta, grailsApplication, pollMode)
+            worker = new UberWorker(queues, workerMeta, pollMode)
+        }
+
+        // add custom job throwable handler if specified
+        def customJobThrowableHandler = grailsApplication.config.grails.uberjobs.jobThrowableHandler
+        if (customJobThrowableHandler && customJobThrowableHandler in UberJobThrowableHandler) {
+            log.info("using ${customJobThrowableHandler.class} as throwable handler")
+            worker.jobThrowableHandler = customJobThrowableHandler.newInstance()
+        } else if (customJobThrowableHandler) {
+            log.warn('The specified job throwable handler class does not implement UberJobThrowableHandler. Ignoring it')
         }
 
         // add custom listener if specified (not implemented yet)
-//        def customListenerClass = grailsApplication.config.grails.uberjobs.custom.listener.clazz
+//        def customListenerClass = grailsApplication.config.grails.uberjobs.listener
 //        if (customListenerClass && customListenerClass in UberWorkerListener) {
 //            worker.workerEventEmitter.addListener(customListenerClass.newInstance() as WorkerListener)
 //        } else if (customListenerClass) {
 //            log.warn('The specified custom listener class does not implement UberWorkerListener. Ignoring it')
-//        }
-
-        // add custom job throwable handler if specified
-        def customJobThrowableHandler = grailsApplication.config.grails.uberjobs.custom.jobThrowableHandler.clazz
-        if (customJobThrowableHandler && customJobThrowableHandler in JobThrowableHandler) {
-            worker.jobThrowableHandler = customJobThrowableHandler.newInstance() as JobThrowableHandler
-        } else if (customJobThrowableHandler) {
-            log.warn('The specified custom job throwable handler class does not implement JobThrowableHandler. Ignoring it')
-        }
-
-        // skip persistence if specified (not yet implemented - currently all workers support persistence)
-//        if (!grailsApplication.config.grails.uberjobs.skipPersistence) {
-//            log.debug("Enabling Persistence for all Jobs")
-//            def autoFlush = grailsApplication.config.grails.uberjobs.autoFlush ?: true
-//            def workerPersistenceListener = new WorkerPersistenceListener(persistenceInterceptor, autoFlush)
-//            worker.workerEventEmitter.addListener(workerPersistenceListener, WorkerEvent.JOB_EXECUTE, WorkerEvent.JOB_SUCCESS, WorkerEvent.JOB_FAILURE)
 //        }
 
         // enable monitoring if specified (not yet implemented)
@@ -136,9 +130,7 @@ class UberWorkerService extends AbstractUberService {
         WORKERS.add(worker)
 
         // start the actual worker thread
-        String workerName = worker.getName()
-        Thread workerThread = new Thread(worker, workerName)
-        workerThread.start()
+        new Thread(worker, worker.getName()).start()
 
         worker
     }
