@@ -24,12 +24,12 @@ grails {
         }
         workers {
             update = true // enable updating of WorkerMeta on application startup
-            cleanup = false // enable pruning of WorkerMeta that is not in config anymore
             restart = true // enable starting from WorkerMeta that is not in config but in DB
             // generic worker pool
             genericPool {
                 workers = 3
                 queueNames = ["testJobQueue", "TestQueue"]
+//                queueNames = ["one", "two", "three", "four", "five"]
             }
             // only working on jobs that use a browser; 1 worker ensures that we don't try to create 2 browsers at the same time.
             usingBrowserPool {
