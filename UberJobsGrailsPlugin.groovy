@@ -23,7 +23,7 @@ class UberJobsGrailsPlugin {
     def description = '''\
 Brief summary/description of the plugin.
 '''
-    def dependsOn = ['hibernate4': '*']
+    def dependsOn = ['hibernate4': "4.0 > *"]
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/uber-jobs"
@@ -122,14 +122,10 @@ Brief summary/description of the plugin.
     }
 
     def onChange = { event ->
+        log.info("$event.source changed")
         // TODO Implement code that is executed when any artefact that this plugin is
         // watching is modified and reloaded. The event contains: event.source,
         // event.application, event.manager, event.ctx, and event.plugin.
-    }
-
-    def onConfigChange = { event ->
-        // TODO Implement code that is executed when the project configuration changes.
-        // The event is the same as for 'onChange'.
     }
 
     def onShutdown = { event ->
