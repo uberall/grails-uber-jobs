@@ -14,9 +14,9 @@ class UberWorkerMeta implements UberApiResponseObject {
     static hasMany = [queues: UberQueue]
 
     /**
-     * We want this to be ordered.
+     * The queue is the owner (parent) of the worker
      */
-    List queues
+    static belongsTo = [UberQueue]
 
     /**
      * the hostname this worker is working on

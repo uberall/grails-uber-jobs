@@ -19,12 +19,18 @@ class UberWorkerService extends AbstractUberService {
 
     def createWorkersFromConfig() {
         def currentCount = UberWorkerMeta.countByHostname(hostName)
-        if(currentCount) {
+        if (currentCount) {
             log.info("pruning $currentCount workers from database")
-            UberWorkerMeta.findAllByHostname(hostName).each {
-                it.delete()
+
+            // deleting children from many-to-many seems to be not that easy ... http://dante.cassanego.net/?p=147
+            UberWorkerMeta.findAllByHostname(hostName).each { w ->
+                def tmp = []
+                w.queues.each { tmp << it }
+                tmp.each { w.removeFromQueues(it) }
+                w.delete()
             }
         }
+
         // iterate over workers configurations
         config.workers.each { String poolName, config ->
             if (poolName in ['update', 'cleanup', 'restart']) {
@@ -88,7 +94,7 @@ class UberWorkerService extends AbstractUberService {
      * @return the started worker
      */
     UberWorker startWorker(List<UberQueue> queues, UberWorkerMeta workerMeta) {
-        log.info "Starting worker processing queues: ${queues}"
+        log.info "Starting worker processing queues: ${queues.name}"
 
         PollMode pollMode = grailsApplication.config.grails.uberjobs.pollMode
         if (!pollMode) {

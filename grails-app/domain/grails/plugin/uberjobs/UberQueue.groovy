@@ -11,7 +11,7 @@ class UberQueue implements UberApiResponseObject {
     /**
      * The list of items to perform
      */
-    static hasMany = [items: UberJob]
+    static hasMany = [items: UberJob, workers: UberWorkerMeta]
 
     /**
      * The name of the Queue
