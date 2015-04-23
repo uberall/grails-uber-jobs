@@ -66,12 +66,12 @@ class UberWorker implements Runnable {
     /**
      * Starts this worker.
      * Handles the state transition from STARTING to IDLE and starts polling the queues for jobs.
-     * Stop this worker by calling end() on any thread.
+     * Stop this worker by calling stop() on any thread.
      */
     @Override
     public void run() {
         if (workerMeta.status != UberWorkerMeta.Status.STARTING) {
-            throw new IllegalStateException("This UberWorker is already running!")
+            throw new IllegalStateException("This UberWorker cannot be started! (status was $workerMeta.status)")
         }
 
         log.info("spinning up worker thread")
@@ -189,17 +189,17 @@ class UberWorker implements Runnable {
      *
      * @param now if true, an effort will be made to stop any job in progress
      */
-    void end(final boolean now) {
+    void stop(boolean now = false) {
+        if (stopped) {
+            log.debug("cannot stop already stopped worker")
+            return
+        }
+
         setWorkerStatus(UberWorkerMeta.Status.STOPPED)
 
         if (now) {
-            Thread workerThread = threadRef
-            if (workerThread != null) {
-                workerThread.interrupt()
-            }
+            threadRef?.interrupt()
         }
-
-        togglePause(false) // Release any threads waiting in checkPaused() - do we need that?
     }
 
     /**

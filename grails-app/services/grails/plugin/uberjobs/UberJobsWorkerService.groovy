@@ -63,7 +63,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
     def shutdown(){
         log.info("Shutting down ${UberWorkerMeta.countByHostnameAndStatusNotEqual(hostName, UberWorkerMeta.Status.STOPPED)}")
         WORKERS.each { worker ->
-            //TODO: it.end()
+            //TODO: it.stop()
         }
         boolean allDone = false
         int attempts = 10
