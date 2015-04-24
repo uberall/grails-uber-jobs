@@ -44,7 +44,8 @@ class UberJobsTriggerMetaService extends AbstractUberJobsService {
             if (updateParams.arguments) {
                 triggerMeta.arguments = updateParams.arguments
             }
-            result = locked.save(failOnError: failOnError, flush: true)
+            result = locked
+            locked.save(failOnError: failOnError, flush: true)
         }
         if (result) {
             uberJobsSchedulingService.updateThreadsNextExecution(triggerMeta.estimatedNextExecution)

@@ -10,14 +10,7 @@ class UberJobsQueueController extends AbstractUberJobsController {
     def uberJobsQueueService
 
     def list() {
-        def list = UberQueue.createCriteria().list(params) {
-            if (!params.getBoolean('includeEmpty')) {
-                items {
-                    eq("status", UberJob.Status.OPEN)
-                }
-            }
-        }
-        renderResponse([list: list, total: list.totalCount])
+        renderResponse([list: UberQueue.list(params), total: UberQueue.count])
     }
 
     def get() {
