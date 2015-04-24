@@ -9,7 +9,7 @@ grails {
         enabled = true // enable the plugin itself
         waitForWorkersOnShutdown = true // waits for jobs to finish on shutdown
         pollMode = PollMode.ROUND_ROBIN // the poll mode for all workers (see PollMode enum for more information)
-        persistenceEnabled = true // if true a session will be opened and closed automatically when a job is executed
+        persistenceEnabled = true // if true a session will be opened and closed automatically for each job that is executed
         frontend {
             enabled = true
             responseType = 'JSON' // one of JSON or XML, defaults to JSON
