@@ -94,7 +94,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
     UberWorker startWorker(List<UberQueue> queues, UberWorkerMeta workerMeta) {
         log.info "Starting worker processing queues: ${queues.name}"
 
-        PollMode pollMode = grailsApplication.config.grails.uberjobs.pollMode
+        PollMode pollMode = config.pollMode
         if (!pollMode) {
             pollMode = PollMode.ROUND_ROBIN
             log.info("no pollMode specified, using $pollMode")
@@ -102,7 +102,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
 
         // use custom worker class if specified
         UberWorker worker
-        def customWorkerClass = grailsApplication.config.grails.uberjobs.worker
+        def customWorkerClass = config.worker
         if (customWorkerClass && customWorkerClass in UberWorker) {
             log.info("using ${customWorkerClass.class} as worker")
             worker = customWorkerClass.newInstance(queues)
@@ -113,7 +113,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         }
 
         // add custom job throwable handler if specified
-        def customJobThrowableHandler = grailsApplication.config.grails.uberjobs.jobThrowableHandler
+        def customJobThrowableHandler = config.jobThrowableHandler
         if (customJobThrowableHandler && customJobThrowableHandler in UberJobThrowableHandler) {
             log.info("using ${customJobThrowableHandler.class} as throwable handler")
             worker.jobThrowableHandler = customJobThrowableHandler.newInstance()
@@ -121,7 +121,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             log.warn('The specified job throwable handler class does not implement UberJobThrowableHandler. Ignoring it')
         }
 
-        Locale locale = grailsApplication.config.grails.uberjobs.jobs.requestContextLocale
+        Locale locale = config.jobs.requestContextLocale ?: null
         if (locale) {
             worker.locale = locale
         }
