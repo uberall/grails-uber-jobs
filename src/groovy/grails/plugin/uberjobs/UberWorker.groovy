@@ -260,6 +260,9 @@ class UberWorker implements Runnable {
         jobThrowableHandler?.onThrowable(t, job, curQueue)
         job.status = UberJob.Status.FAILED
         job.save()
+
+        UberJobFailure failure = new UberJobFailure(exception: t.class.toString(), message: t.message, stacktrace: (t.stackTrace as JSON).toString(), job: job)
+        failure.save()
     }
 
     /**

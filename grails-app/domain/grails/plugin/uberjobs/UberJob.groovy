@@ -15,6 +15,11 @@ class UberJob implements UberApiResponseObject {
     static hasMany = [triggers: UberTriggerMeta]
 
     /**
+     * The job failure
+     */
+    static hasOne = [failure: UberJobFailure]
+
+    /**
      * Every item belongs into a Queue
      */
     static belongsTo = [queue: UberQueue]
