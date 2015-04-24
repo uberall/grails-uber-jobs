@@ -33,6 +33,7 @@ class UberJobsJobService extends AbstractUberJobsService {
         uberJob.arguments.addAll(arguments)
         if(uberJob.validate()){
             uberJob.save()
+            log.debug("enqueued $job.simpleName in queue $queue")
         }else {
             log.error("UberJob could not be validated: $uberJob.errors.allErrors")
         }
