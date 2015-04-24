@@ -115,7 +115,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         // add custom job throwable handler if specified
         def customJobThrowableHandler = config.jobThrowableHandler
         if (customJobThrowableHandler && customJobThrowableHandler in UberJobThrowableHandler) {
-            log.info("using ${customJobThrowableHandler.class} as throwable handler")
+            log.info("using ${customJobThrowableHandler.simpleName} as throwable handler")
             worker.jobThrowableHandler = customJobThrowableHandler.newInstance()
         } else if (customJobThrowableHandler) {
             log.warn('The specified job throwable handler class does not implement UberJobThrowableHandler. Ignoring it')
@@ -124,6 +124,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         Locale locale = config.jobs.requestContextLocale ?: null
         if (locale) {
             worker.locale = locale
+            log.info("using ${locale} as locale")
         }
 
         // add custom listener if specified (not implemented yet)
