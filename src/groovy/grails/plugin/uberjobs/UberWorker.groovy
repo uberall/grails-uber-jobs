@@ -1,5 +1,6 @@
 package grails.plugin.uberjobs
 
+import grails.converters.JSON
 import grails.util.GrailsWebUtil
 import groovy.util.logging.Log4j
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
@@ -220,6 +221,8 @@ class UberWorker implements Runnable {
      * @param curQueue the queue the payload came from
      */
     protected void process(UberJob job, UberQueue curQueue) {
+        def started = DateTime.now()
+
         try {
             log.debug("processing job $job.id, worker is now WORKING")
             setWorkerStatus(UberWorkerMeta.Status.WORKING)
@@ -236,6 +239,9 @@ class UberWorker implements Runnable {
         } finally {
             log.debug("processing job $job.id finished, worker is now IDLE")
             setWorkerStatus(UberWorkerMeta.Status.IDLE)
+            job.done = DateTime.now()
+            job.started = started
+            job.save()
         }
     }
 
