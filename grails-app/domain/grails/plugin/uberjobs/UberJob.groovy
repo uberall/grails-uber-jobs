@@ -85,6 +85,7 @@ class UberJob implements UberApiResponseObject {
         doAt nullable: false
         started nullable: true
         done nullable: true
+        failure nullable: true
     }
 
     static mapping = {

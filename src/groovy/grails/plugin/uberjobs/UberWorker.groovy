@@ -267,7 +267,11 @@ class UberWorker implements Runnable {
         job.status = UberJob.Status.FAILED
         job.save()
 
-        UberJobFailure failure = new UberJobFailure(exception: t.class.toString(), message: t.message, stacktrace: (t.stackTrace as JSON).toString(), job: job)
+        UberJobFailure failure = new UberJobFailure()
+        failure.exception = t.class.toString()
+        failure.message = t.message
+        failure.stacktrace = (t.stackTrace as JSON).toString()
+        failure.job = job
         failure.save()
     }
 
