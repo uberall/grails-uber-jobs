@@ -3,6 +3,7 @@ package grails.plugin.uberjobs
 import grails.converters.JSON
 import grails.util.GrailsWebUtil
 import groovy.util.logging.Log4j
+import org.apache.commons.lang.math.RandomUtils
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
@@ -357,7 +358,8 @@ class UberWorker implements Runnable {
                 log.debug("popped job from queue $queue.name")
             }
         } catch (OptimisticLockingFailureException ignore) {
-            log.debug("another worker already popped job $job.id, trying queue $queue.name again ...")
+            log.debug("another worker already popped job $job.id, trying queue $queue.name again in a bit")
+            threadRef.sleep(RandomUtils.nextInt(1000))
             return pop(queue)
         }
 
