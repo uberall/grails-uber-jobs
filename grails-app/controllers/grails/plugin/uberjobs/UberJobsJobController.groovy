@@ -32,8 +32,15 @@ class UberJobsJobController extends AbstractUberJobsController {
             renderBadRequest([errors: [args: 'NULLABLE']])
             return
         }
+
+        // we double check queue as we dont want empty string to be used as queuenames
+        String queue = null
+        if(json.queue)
+            queue = json.queue as String
+
         def result = uberJobsJobService.enqueue(json.job.toString(), json.args as List)
-        renderResponse([succes: result?.validate()])
+
+        renderResponse([succes: result.validate()])
     }
 
     def delete() {

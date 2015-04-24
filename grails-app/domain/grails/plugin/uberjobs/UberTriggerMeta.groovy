@@ -70,7 +70,7 @@ class UberTriggerMeta implements UberApiResponseObject {
         updateEstimatedNextExecution()
     }
 
-    void updateEstimatedNextExecution(){
+    void updateEstimatedNextExecution() {
         estimatedNextExecution = new CronExpression(cronExpression).getNextValidTimeAfter(DateTime.now())
     }
 
@@ -98,15 +98,16 @@ class UberTriggerMeta implements UberApiResponseObject {
     @Override
     Map toResponseObject() {
         [
-                id            : id,
-                name          : name,
-                queueName     : queueName,
-                cronExpression: cronExpression,
-                nextFire      : new CronExpression(cronExpression).getNextValidTimeAfter(DateTime.now()).millis,
-                enabled       : enabled,
-                lastFired     : lastFired?.millis,
-                dateCreated   : dateCreated?.millis,
-                lastUpdated   : lastUpdated?.millis,
+                id                    : id,
+                name                  : name,
+                queueName             : queueName,
+                enabled               : enabled,
+                cronExpression        : cronExpression,
+                estimatedNextExecution: estimatedNextExecution?.millis,
+                lastFired             : lastFired?.millis,
+                dateCreated           : dateCreated?.millis,
+                lastUpdated           : lastUpdated?.millis,
+                arguments             : arguments
         ]
     }
 }

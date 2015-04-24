@@ -13,6 +13,7 @@ grails {
             enabled = true
             responseType = 'JSON' // one of JSON or XML, defaults to JSON
             max = 20 // default max list size
+            baseUrl = "http://localhost:8080/uberjobs/api" // if you use the uber-jobs-admin plugin, this setting is needed to determine the API url
         }
         jobs {
             update = true // enable updating JobMeta on application startup
