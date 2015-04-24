@@ -1,19 +1,14 @@
 package grails.plugin.uberjobs
 
 import grails.transaction.Transactional
-import grails.util.GrailsWebUtil
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
-import org.springframework.web.context.WebApplicationContext
-
-import javax.servlet.ServletContext
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 
 @Transactional
 class UberJobsWorkerService extends AbstractUberJobsService {
 
     def uberJobsQueueService
     def uberJobsWorkerMetaService
+    PersistenceContextInterceptor persistenceInterceptor
 
     private static final List WORKERS = []
 
@@ -121,10 +116,17 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             log.warn('The specified job throwable handler class does not implement UberJobThrowableHandler. Ignoring it')
         }
 
+        // add configured locale to worker
         Locale locale = config.jobs.requestContextLocale ?: null
         if (locale) {
             worker.locale = locale
             log.info("using ${locale} as locale")
+        }
+
+        // add persistence support if configured
+        if (config.persistenceEnabled) {
+            log.info("enabling persistence")
+            worker.persistenceHandler = new WorkerPersistenceHandler(persistenceInterceptor)
         }
 
         // add custom listener if specified (not implemented yet)

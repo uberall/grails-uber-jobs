@@ -25,6 +25,7 @@ class UberWorker implements Runnable {
     protected PollMode pollMode
     protected Locale locale
     protected boolean paused = false
+    protected WorkerPersistenceHandler persistenceHandler
     protected static final long EMPTY_QUEUE_SLEEP_TIME = 1000 // 1 second
 
     /**
@@ -223,11 +224,12 @@ class UberWorker implements Runnable {
             log.debug("processing job $job.id, worker is now WORKING")
             setWorkerStatus(UberWorkerMeta.Status.WORKING)
 
-            // get an instance of the job bean ...
             def instance = job.job.jobBean
 
-            // ... and execute it
+            persistenceHandler?.bindSession()
             instance.perform(* job.arguments)
+            persistenceHandler?.unbindSession()
+
             success(job)
         } catch (Throwable t) {
             failure(t, job, curQueue)
