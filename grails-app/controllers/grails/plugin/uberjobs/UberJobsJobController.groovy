@@ -4,8 +4,6 @@ class UberJobsJobController extends AbstractUberJobsController {
 
     static allowedMethods = [list: 'GET', get: 'GET', enqueue: 'POST', delete: 'DELETE', update: 'PUT']
 
-    def uberJobsJobService
-
     def list() {
         List statuses
         if (params.status) {
@@ -28,7 +26,7 @@ class UberJobsJobController extends AbstractUberJobsController {
         if (!json.job) {
             renderBadRequest([errors: [job: 'NULLABLE']])
             return
-        } else if (!json.args) {
+        } else if (json.args == null) {
             renderBadRequest([errors: [args: 'NULLABLE']])
             return
         }
@@ -38,7 +36,7 @@ class UberJobsJobController extends AbstractUberJobsController {
         if(json.queue)
             queue = json.queue as String
 
-        def result = uberJobsJobService.enqueue(json.job.toString(), json.args as List)
+        def result = uberJobsJobService.enqueue(json.job.toString(), json.args as List, queue)
 
         renderResponse([succes: result.validate()])
     }
