@@ -25,7 +25,7 @@ class UberJobsTriggerMetaService extends AbstractUberJobsService {
         triggerMeta
     }
 
-    def update(UberTriggerMeta triggerMeta, Map updateParams) {
+    def update(UberTriggerMeta triggerMeta, Map updateParams, boolean failOnError = true) {
         def result = null
         UberTriggerMeta.withNewTransaction {
             def locked = UberTriggerMeta.lock(triggerMeta.id)
@@ -44,7 +44,7 @@ class UberJobsTriggerMetaService extends AbstractUberJobsService {
             if (updateParams.arguments) {
                 triggerMeta.arguments = updateParams.arguments
             }
-            result = locked.save(failOnError: true, flush: true)
+            result = locked.save(failOnError: failOnError, flush: true)
         }
         if (result) {
             uberJobsSchedulingService.updateThreadsNextExecution(triggerMeta.estimatedNextExecution)

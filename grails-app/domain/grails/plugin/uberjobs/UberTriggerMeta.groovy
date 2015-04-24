@@ -67,6 +67,13 @@ class UberTriggerMeta implements UberApiResponseObject {
 
     void beforeValidate() {
         argumentsJSON = ((arguments) as JSON).toString()
+    }
+
+    def beforeUpdate() {
+        updateEstimatedNextExecution()
+    }
+
+    def beforeInsert() {
         updateEstimatedNextExecution()
     }
 

@@ -23,7 +23,7 @@ class UberJobsTriggerMetaController extends AbstractUberJobsController {
     @Transactional(readOnly = false)
     def update() {
         withDomainObject(UberTriggerMeta) { UberTriggerMeta triggerMeta ->
-            def result = uberJobsTriggerMetaService.update(triggerMeta, request.JSON as Map)
+            def result = uberJobsTriggerMetaService.update(triggerMeta, request.JSON as Map, false)
             if (!result.validate()) {
                 renderErrorResponse(result)
             } else {
