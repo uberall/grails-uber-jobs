@@ -60,18 +60,16 @@ class UberJob implements UberApiResponseObject {
     DateTime dateCreated
 
     /**
-     * Helper field to put and receive args, will be serialized to JSON in beforeValidate
+     * Helper field to put and receive args, will be serialized to JSON in beforeValidate and load again in afterLoad
      */
     transient List arguments = []
 
-    List getArguments() {
-        if (!arguments && argumentsJSON)
-            arguments = JSON.parse(argumentsJSON) as List
-        arguments
-    }
-
     void beforeValidate() {
         argumentsJSON = ((arguments) as JSON).toString()
+    }
+
+    void afterLoad() {
+        arguments = JSON.parse(argumentsJSON) as List
     }
 
     static constraints = {
