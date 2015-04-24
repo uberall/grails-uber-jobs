@@ -129,13 +129,9 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             worker.persistenceHandler = new WorkerPersistenceHandler(persistenceInterceptor)
         }
 
-        // add custom listener if specified (not implemented yet)
-//        def customListenerClass = grailsApplication.config.grails.uberjobs.listener
-//        if (customListenerClass && customListenerClass in UberWorkerListener) {
-//            worker.workerEventEmitter.addListener(customListenerClass.newInstance() as WorkerListener)
-//        } else if (customListenerClass) {
-//            log.warn('The specified custom listener class does not implement UberWorkerListener. Ignoring it')
-//        }
+        def emptyQueueSleepTime = config.emptyQueueSleepTime ?: 1000
+        log.info("using $emptyQueueSleepTime as sleep time")
+        worker.emptyQueueSleepTime = emptyQueueSleepTime
 
         // enable monitoring if specified (not yet implemented)
 //        boolean monitoring = grailsApplication.config.grails.uberjobs.monitoring as boolean

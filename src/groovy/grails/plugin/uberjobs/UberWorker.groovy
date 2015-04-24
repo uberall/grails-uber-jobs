@@ -28,7 +28,7 @@ class UberWorker implements Runnable {
     protected Locale locale
     protected boolean paused = false
     protected WorkerPersistenceHandler persistenceHandler
-    protected static final long EMPTY_QUEUE_SLEEP_TIME = 1000 // 1 second
+    protected long emptyQueueSleepTime = 2000 // 2 seconds
 
     /**
      * Creates a new UberWorker.

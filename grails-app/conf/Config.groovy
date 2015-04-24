@@ -28,6 +28,7 @@ grails {
         workers {
             update = true // enable updating of WorkerMeta on application startup
             restart = true // enable starting from WorkerMeta that is not in config but in DB
+            emptyQueueSleepTime = 2000 // time in milliseconds a worker should sleep if all of his queues are empty
             // generic worker pool
             genericPool {
                 workers = 3
