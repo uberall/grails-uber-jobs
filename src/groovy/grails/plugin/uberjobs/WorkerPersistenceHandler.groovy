@@ -7,7 +7,6 @@ import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 class WorkerPersistenceHandler {
 
     PersistenceContextInterceptor persistenceInterceptor
-    boolean boundByMe = false
 
     WorkerPersistenceHandler(PersistenceContextInterceptor persistenceInterceptor) {
         this.persistenceInterceptor = persistenceInterceptor
@@ -17,28 +16,19 @@ class WorkerPersistenceHandler {
         if (persistenceInterceptor == null)
             throw new IllegalStateException("No persistenceInterceptor property provided")
 
-        log.debug("binding session")
-
-        if (persistenceInterceptor.isOpen()) {
-            boundByMe = true
-            persistenceInterceptor.init()
-        }
+        persistenceInterceptor.init()
     }
 
     void unbindSession() {
         if (persistenceInterceptor == null)
             throw new IllegalStateException("No persistenceInterceptor property provided")
 
-        log.debug("unbinding session")
-
-        if (boundByMe) {
-            try {
-                persistenceInterceptor.flush()
-            } catch (Exception exception) {
-                fireThreadException(exception)
-            } finally {
-                persistenceInterceptor.destroy()
-            }
+        try {
+            persistenceInterceptor.flush()
+        } catch (Exception exception) {
+            fireThreadException(exception)
+        } finally {
+            persistenceInterceptor.destroy()
         }
     }
 
