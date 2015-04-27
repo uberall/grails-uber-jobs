@@ -56,11 +56,18 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         }
     }
 
-    void shutdown() {
+    /**
+     * Tell all workers to gracefully shutdownAllWorkers.
+     * Called by the plugin itself (onShutdown).
+     * Does not use signals, but instead directly calls the worker threads' end method.
+     */
+    void shutdownAllWorkers() {
         log.info("Shutting down ${UberWorkerMeta.countByHostnameAndStatusNotEqual(hostName, UberWorkerMeta.Status.STOPPED)} workers ")
+
         WORKERS.each { UberWorker worker ->
             worker.stop(true)
         }
+
         int attempts = 10
         while (attempts > 0){
             sleep(1000)
