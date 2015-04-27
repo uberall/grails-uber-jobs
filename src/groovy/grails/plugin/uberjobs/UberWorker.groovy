@@ -324,13 +324,7 @@ class UberWorker implements Runnable {
      * @param paused
      */
     void togglePause(boolean paused) {
-        if (paused) {
-            this.paused = paused
-            setWorkerStatus(UberWorkerMeta.Status.PAUSED)
-        } else {
-            this.paused = paused
-            setWorkerStatus(UberWorkerMeta.Status.IDLE)
-        }
+        this.paused = paused
     }
 
     Collection<UberQueue> getQueues() {
@@ -371,11 +365,14 @@ class UberWorker implements Runnable {
      */
     protected void checkPaused() {
         if (paused) {
+            setWorkerStatus(UberWorkerMeta.Status.PAUSED)
+
             while (paused) {
                 log.trace("worker is paused, sleeping for $pauseSleepTime")
                 threadRef.sleep(pauseSleepTime)
             }
 
+            setWorkerStatus(UberWorkerMeta.Status.IDLE)
             log.debug("worker was released from paused mode")
         }
     }

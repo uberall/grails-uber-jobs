@@ -53,6 +53,9 @@ class UberSignal {
          */
         WORKER_QUEUE_ADD,
 
+        /**
+         * signal to start a new worker on a given host
+         */
         WORKER_START
     }
 
