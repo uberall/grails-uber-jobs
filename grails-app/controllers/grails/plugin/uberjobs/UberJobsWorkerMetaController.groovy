@@ -26,12 +26,12 @@ class UberJobsWorkerMetaController extends AbstractUberJobsController {
 
     def create() {
         def json = request.JSON
+        def poolName = json.poolName
         if (!json.queues) {
             renderBadRequest([error: [queues: 'NULLABLE']])
             return
-        } else if (!json.poolName) {
-            renderBadRequest([error: [poolName: 'NULLABLE']])
-            return
+        } else if (!poolName) {
+            poolName = config.workers.manualPoolName ?: "manualPool"
         }
         def queues = null
         def queueIds = json.queues?.collect {it.id as long}
@@ -45,13 +45,14 @@ class UberJobsWorkerMetaController extends AbstractUberJobsController {
 
         def maxIndex = UberWorkerMeta.createCriteria().get {
             eq('hostname', uberJobsWorkerService.hostName)
-            eq('poolName', json.poolName)
+            eq('poolName', poolName)
             projections {
                 max('index')
             }
         }
         int newIndex = maxIndex != null ? maxIndex + 1 : 0
-        def workerMeta = uberJobsWorkerService.startWorker(json.poolName, newIndex, queues)
+        def workerMeta = uberJobsWorkerService.createWorkerMeta(poolName, newIndex, queues)
+        uberJobsWorkerService.startWorker(workerMeta)
 
         renderResponse([worker: workerMeta])
     }

@@ -83,7 +83,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             // TODO: UPDATE
         }
 
-        startWorker(queues, workerMeta)
+        doStartWorker(workerMeta)
     }
 
     /**
@@ -92,7 +92,8 @@ class UberJobsWorkerService extends AbstractUberJobsService {
      * @param queues the queues this worker should poll for jobs to process
      * @return the started worker
      */
-    UberWorker startWorker(List<UberQueue> queues, UberWorkerMeta workerMeta) {
+    UberWorker doStartWorker(UberWorkerMeta workerMeta) {
+        def queues = workerMeta.queues
         log.info "Starting worker processing queues: ${queues.name}"
 
         PollMode pollMode = config.pollMode
@@ -202,14 +203,27 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         stopSignal.save()
     }
 
+    /**
+     * Start a worker on a host.
+     *
+     * @param worker the worker to send to STOPPED state
+     */
+    UberSignal startWorker(UberWorkerMeta worker) {
+        UberSignal startWorkerSignal = new UberSignal()
+        startWorkerSignal.receiver = worker.hostname
+        startWorkerSignal.arguments << [workerMetaId: worker.id]
+        startWorkerSignal.value = UberSignal.Value.WORKER_START
+        startWorkerSignal.save()
+    }
+
     UberWorker getWorker(String name) {
         WORKERS.find { worker ->
             worker.name == name
         }
     }
 
-    private UberWorkerMeta createWorkerMeta(String poolName, int index, List<UberQueue> queues) {
-        UberWorkerMeta workerMeta = new UberWorkerMeta(poolName: poolName, index: index, hostname: hostName, status:  UberWorkerMeta.Status.STARTING)
+    UberWorkerMeta createWorkerMeta(String poolName, int index, List<UberQueue> queues, String hostname = hostName) {
+        UberWorkerMeta workerMeta = new UberWorkerMeta(poolName: poolName, index: index, hostname: hostname, status: UberWorkerMeta.Status.STARTING)
         queues.each {
             workerMeta.addToQueues(it)
         }

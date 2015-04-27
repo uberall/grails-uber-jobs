@@ -41,6 +41,9 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
             case UberSignal.Value.WORKER_STOP:
                 emitStopSignal(signal)
                 break
+            case UberSignal.Value.WORKER_START:
+                emitStartWorkerSignal(signal)
+                break
             default:
                 throw new IllegalArgumentException("signal $signal.id has no value!")
         }
@@ -50,12 +53,20 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
      * Polls the signal queue.
      */
     void poll() {
-        UberSignal signal = UberSignal.findByReceiver(hostName)
+        UberSignal signal = null
 
-        if (signal) {
-            log.debug("popped signal: $signal.value (args: $signal.arguments)")
-            signal.delete()
+        UberSignal.withNewTransaction {
+            signal = UberSignal.findByReceiver(hostName)
+            signal?.delete()
+        }
+
+        if (!signal) return
+
+        try {
+            log.debug("handling signal: $signal.value (args: $signal.arguments)")
             handleSignal(signal)
+        } catch (Throwable t) {
+            log.error("error while handling signal", t)
         }
     }
 
@@ -66,9 +77,8 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
      */
     void emitPauseSignal(UberSignal pauseSignal) {
         String workerName = getWorkerReceiverName(pauseSignal)
-        UberWorker worker = uberJobsWorkerService.getWorker(workerName)
-
         log.debug("emitting pause signal to worker $workerName")
+        UberWorker worker = uberJobsWorkerService.getWorker(workerName)
         worker.togglePause(true)
     }
 
@@ -79,9 +89,8 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
      */
     void emitResumeSignal(UberSignal resumeSignal) {
         String workerName = getWorkerReceiverName(resumeSignal)
-        UberWorker worker = uberJobsWorkerService.getWorker(workerName)
-
         log.debug("emitting resume signal to worker $workerName")
+        UberWorker worker = uberJobsWorkerService.getWorker(workerName)
         worker.togglePause(false)
     }
 
@@ -92,10 +101,20 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
      */
     void emitStopSignal(UberSignal stopSignal) {
         String workerName = getWorkerReceiverName(stopSignal)
+        log.debug("emitting stop signal to worker $workerName")
         UberWorker worker = uberJobsWorkerService.getWorker(workerName)
-
-        log.debug("emitting resume signal to worker $workerName")
         worker.stop(true)
+    }
+
+    /**
+     * Emits a WORKER_START signal to a worker.
+     *
+     * @param stopSignal the signal that was received
+     */
+    void emitStartWorkerSignal(UberSignal startWorkerSignal) {
+        UberWorkerMeta meta = UberWorkerMeta.get(startWorkerSignal.arguments.workerMetaId as long)
+        log.debug("emitting start worker signal $meta.name")
+        uberJobsWorkerService.doStartWorker(meta)
     }
 
     @Override

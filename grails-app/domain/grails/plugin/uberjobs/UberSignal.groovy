@@ -51,7 +51,9 @@ class UberSignal {
         /**
          * signal to tell a worker to start working on a specific queue
          */
-        WORKER_QUEUE_ADD
+        WORKER_QUEUE_ADD,
+
+        WORKER_START
     }
 
     void beforeValidate() {

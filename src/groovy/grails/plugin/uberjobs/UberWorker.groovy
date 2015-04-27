@@ -382,7 +382,7 @@ class UberWorker implements Runnable {
 
     protected void setWorkerStatus(UberWorkerMeta.Status status) {
         workerMeta.status = status
-        workerMeta.save()
+        workerMeta.save(flush: true)
     }
 
     @Override
@@ -400,14 +400,6 @@ class UberWorker implements Runnable {
         WebApplicationContext ctx = servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT) as WebApplicationContext
         GrailsWebRequest req = GrailsWebUtil.bindMockWebRequest(ctx)
         req.currentRequest.addPreferredLocale(Locale.default)
-    }
-
-    /**
-     * Checks if we received a WORKER_RESUME signal.
-     * @return
-     */
-    private UberSignal getResumeSignal() {
-        UberSignal.findByReceiverAndValue(name, UberSignal.Value.WORKER_RESUME)
     }
 
 }
