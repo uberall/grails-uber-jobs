@@ -2,6 +2,8 @@ package grails.plugin.uberjobs
 
 class UberJobsWorkerMetaController extends AbstractUberJobsController {
 
+    static allowedMethods = [list: 'GET', get: 'GET', create: 'POST', pause: 'PUT', stop: 'PUT', resume: 'PUT']
+
     def uberJobsWorkerService
 
     def list() {
