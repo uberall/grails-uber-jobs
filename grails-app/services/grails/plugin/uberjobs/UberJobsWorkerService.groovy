@@ -11,6 +11,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
     PersistenceContextInterceptor persistenceInterceptor
 
     private static final List WORKERS = []
+    private static final List UNPARSED_CONFIG_PARAMETERS = ['update', 'cleanup', 'restart', 'emptyQueueSleepTime']
 
     def createWorkersFromConfig() {
         def currentCount = UberWorkerMeta.countByHostname(hostName)
@@ -28,7 +29,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
 
         // iterate over workers configurations
         config.workers.each { String poolName, config ->
-            if (poolName in ['update', 'cleanup', 'restart', 'emptyQueueSleepTime']) {
+            if (poolName in UNPARSED_CONFIG_PARAMETERS) {
                 return
             }
             List queueNames
