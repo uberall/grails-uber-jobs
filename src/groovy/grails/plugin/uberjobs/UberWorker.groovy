@@ -344,7 +344,7 @@ class UberWorker implements Runnable {
 
         try {
             job = UberJob.findByStatusAndQueueAndDoAtLessThan(UberJob.Status.OPEN, queue, DateTime.now())
-            if (job) {
+            if (job && job.job.enabled && job.queue.enabled) {
                 job.status = UberJob.Status.WORKING
                 job.save(flush: true)
                 log.debug("popped job from queue $queue.name")
