@@ -33,7 +33,11 @@ class UberJobsWorkerMetaController extends AbstractUberJobsController {
             renderBadRequest([error: [poolName: 'NULLABLE']])
             return
         }
-        def queues = UberQueue.findAllByIdInList(json.queues)
+        def queues = null
+        def queueIds = json.queues?.collect {it.id as long}
+        if(queueIds) {
+            queues = UberQueue.findAllByIdInList(queueIds)
+        }
         if (!queues) {
             renderBadRequest([error: [queues: 'INVALID']])
             return
