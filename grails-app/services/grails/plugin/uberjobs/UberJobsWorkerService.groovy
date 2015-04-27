@@ -164,8 +164,32 @@ class UberJobsWorkerService extends AbstractUberJobsService {
      */
     UberSignal pauseWorker(UberWorkerMeta worker) {
         UberSignal pauseSignal = new UberSignal()
-        pauseSignal.key = worker.name
+        pauseSignal.receiver = worker.name
         pauseSignal.value = UberSignal.Value.WORKER_PAUSE
+        pauseSignal.save()
+    }
+
+    /**
+     * Resume a worker. Sends a signal to the specified paused worker that it should continue working.
+     *
+     * @param worker the worker that should resume its work
+     */
+    UberSignal resumeWorker(UberWorkerMeta worker) {
+        UberSignal pauseSignal = new UberSignal()
+        pauseSignal.receiver = worker.name
+        pauseSignal.value = UberSignal.Value.WORKER_RESUME
+        pauseSignal.save()
+    }
+
+    /**
+     * Stop a worker. Sends a signal to the specified worker that it should gracefully shutdown.
+     *
+     * @param worker the worker to send to STOPPED state
+     */
+    UberSignal stopWorker(UberWorkerMeta worker) {
+        UberSignal pauseSignal = new UberSignal()
+        pauseSignal.receiver = worker.name
+        pauseSignal.value = UberSignal.Value.WORKER_STOP
         pauseSignal.save()
     }
 

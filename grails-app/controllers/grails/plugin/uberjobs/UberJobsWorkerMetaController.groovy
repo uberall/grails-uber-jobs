@@ -6,16 +6,15 @@ class UberJobsWorkerMetaController extends AbstractUberJobsController {
 
     def list() {
         def list = UberWorkerMeta.createCriteria().list(params) {
-            if(!params.getBoolean("includeIdle")){
+            if (!params.getBoolean("includeIdle")) {
                 notEqual('status', UberWorkerMeta.Status.IDLE)
             }
-            if(!params.getBoolean("includeStopped")){
+            if (!params.getBoolean("includeStopped")) {
                 notEqual('status', UberWorkerMeta.Status.STOPPED)
             }
         }
         renderResponse([list: list, total: list.totalCount])
     }
-
 
     def get() {
         withDomainObject(UberWorkerMeta) { UberWorkerMeta uberWorkerMeta ->
@@ -38,7 +37,6 @@ class UberJobsWorkerMetaController extends AbstractUberJobsController {
             return
         }
 
-
         def maxIndex = UberWorkerMeta.createCriteria().get {
             eq('hostname', uberJobsWorkerService.hostName)
             eq('poolName', json.poolName)
@@ -46,17 +44,31 @@ class UberJobsWorkerMetaController extends AbstractUberJobsController {
                 max('index')
             }
         }
-        int newIndex = maxIndex != null ? maxIndex+1 : 0
+        int newIndex = maxIndex != null ? maxIndex + 1 : 0
         def workerMeta = uberJobsWorkerService.start(json.poolName, newIndex, queues)
 
         renderResponse([worker: workerMeta])
     }
 
     def pause() {
-        //TODO: implement me!
+        withDomainObject(UberWorkerMeta) { UberWorkerMeta uberWorkerMeta ->
+            def signal = uberJobsWorkerService.pauseWorker(uberWorkerMeta)
+            renderResponse([signal: signal])
+        }
+    }
+
+    def resume() {
+        withDomainObject(UberWorkerMeta) { UberWorkerMeta uberWorkerMeta ->
+            def signal = uberJobsWorkerService.resumeWorker(uberWorkerMeta)
+            renderResponse([signal: signal])
+        }
     }
 
     def stop() {
-        //TODO: implement me!
+        withDomainObject(UberWorkerMeta) { UberWorkerMeta uberWorkerMeta ->
+            def signal = uberJobsWorkerService.stopWorker(uberWorkerMeta)
+            renderResponse([signal: signal])
+        }
     }
+
 }

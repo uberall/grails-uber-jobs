@@ -25,7 +25,6 @@ class UberWorker implements Runnable {
     protected UberWorkerMeta workerMeta
     protected PollMode pollMode
     protected Locale locale
-    protected boolean paused = false
     protected WorkerPersistenceHandler persistenceHandler
     protected long emptyQueueSleepTime = 2000 // 2 seconds
 
@@ -123,9 +122,9 @@ class UberWorker implements Runnable {
                 boolean worked = false
                 queueNames.each { UberQueue curQueue ->
                     if (!worked) {
-                        checkPaused()
+                        checkSignals()
 
-                        // Might have been waiting in poll()/checkPaused() for a while
+                        // Might have been waiting in poll()/checkSignals() for a while
                         if (idle) {
                             UberJob job = pop(curQueue)
 
@@ -164,9 +163,9 @@ class UberWorker implements Runnable {
             while (idle) {
                 curQueue = queueNames.poll()
                 queueNames.add(curQueue) // Rotate the queues
-                checkPaused()
+                checkSignals()
 
-                // Might have been waiting in poll()/checkPaused() for a while, so check the state again
+                // Might have been waiting in poll()/checkSignals() for a while, so check the state again
                 if (idle) {
                     UberJob job = pop(curQueue)
 
@@ -296,7 +295,7 @@ class UberWorker implements Runnable {
      * @return
      */
     boolean isPaused() {
-        return paused
+        return workerMeta.status == UberWorkerMeta.Status.PAUSED
     }
 
     /**
@@ -320,11 +319,9 @@ class UberWorker implements Runnable {
     void togglePause(boolean paused) {
         if (paused) {
             // we should go to pause state
-        }
-        if (workerMeta.status == UberWorkerMeta.Status.PAUSED) return
-        this.paused.set(paused)
-        synchronized (this.paused) {
-            this.paused.notifyAll()
+            this.paused = paused
+        } else {
+            this.paused = paused
         }
     }
 
@@ -362,18 +359,37 @@ class UberWorker implements Runnable {
     }
 
     /**
-     * Checks to see if worker is paused. If so, wait until unpaused.
+     * Checks to see if a signal is waiting for this worker to be processed.
+     * The signal may tell us to pause working, or to completely shutdown.
      */
-    protected void checkPaused() {
-        if (paused) {
-            while (paused) {
+    protected void checkSignals() {
+        UberSignal signal = popSignal()
+
+        if (!signal) return
+
+        if (signal.value == UberSignal.Value.WORKER_STOP) {
+            log.debug "received WORKER_STOP signal"
+
+            stop(true)
+        } else if (signal.value == UberSignal.Value.WORKER_PAUSE) {
+            log.debug "received WORKER_PAUSE signal"
+
+            setWorkerStatus(UberWorkerMeta.Status.PAUSED)
+
+            // actively poll the signal queue and check for a WORKER_CONTINUE signal
+            while (!getContinueSignal()) {
+                // TODO: handle case when stop signal arrives right here
                 try {
-                    log.debug("now waiting in checkPaused")
-                    paused.wait()
-                } catch (InterruptedException ie) {
-                    log.warn("Worker interrupted in checkPaused", ie)
+                    // as long as we didn't receive a continue signal, we sleep
+                    log.trace("worker is paused, sleeping")
+                    threadRef.sleep(emptyQueueSleepTime)
+                } catch (InterruptedException ignore) {
+                    log.warn("Worker interrupted while pausing in checkSignals")
                 }
             }
+
+            log.debug("worker was released from paused mode")
+            setWorkerStatus(UberWorkerMeta.Status.IDLE)
         }
     }
 
@@ -397,6 +413,31 @@ class UberWorker implements Runnable {
         WebApplicationContext ctx = servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT) as WebApplicationContext
         GrailsWebRequest req = GrailsWebUtil.bindMockWebRequest(ctx)
         req.currentRequest.addPreferredLocale(Locale.default)
+    }
+
+    /**
+     * Checks if we received a WORKER_CONTINUE signal.
+     * @return
+     */
+    private UberSignal getContinueSignal() {
+        UberSignal.findByReceiverAndValue(name, UberSignal.Value.WORKER_CONTINUE)
+    }
+
+    /**
+     * Pops a signal from the signal queue.
+     * If a signal was popped, it's immediately deleted.
+     *
+     * @return
+     */
+    private UberSignal popSignal() {
+        def signal = UberSignal.findByReceiver(getName())
+
+        if (signal) {
+            log.debug("popped signal: $signal.value (args: $signal.arguments)")
+            signal.delete()
+        }
+
+        signal
     }
 
 }
