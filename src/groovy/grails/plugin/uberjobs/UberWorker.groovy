@@ -377,7 +377,7 @@ class UberWorker implements Runnable {
             setWorkerStatus(UberWorkerMeta.Status.PAUSED)
 
             // actively poll the signal queue and check for a WORKER_CONTINUE signal
-            while (!getContinueSignal()) {
+            while (!getResumeSignal()) {
                 // TODO: handle case when stop signal arrives right here
                 try {
                     // as long as we didn't receive a continue signal, we sleep
@@ -416,11 +416,11 @@ class UberWorker implements Runnable {
     }
 
     /**
-     * Checks if we received a WORKER_CONTINUE signal.
+     * Checks if we received a WORKER_RESUME signal.
      * @return
      */
-    private UberSignal getContinueSignal() {
-        UberSignal.findByReceiverAndValue(name, UberSignal.Value.WORKER_CONTINUE)
+    private UberSignal getResumeSignal() {
+        UberSignal.findByReceiverAndValue(name, UberSignal.Value.WORKER_RESUME)
     }
 
     /**
