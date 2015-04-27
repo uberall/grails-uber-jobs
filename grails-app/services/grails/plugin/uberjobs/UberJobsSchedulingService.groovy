@@ -2,27 +2,22 @@ package grails.plugin.uberjobs
 
 import grails.transaction.Transactional
 import org.joda.time.DateTime
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.dao.OptimisticLockingFailureException
 
 @Transactional
-class UberJobsSchedulingService extends AbstractUberJobsService {
+class UberJobsSchedulingService extends AbstractUberJobsService implements InitializingBean {
 
     private static UberSchedulingThread schedulingThread
     def uberJobsJobService
 
     def startThread() {
-        if (schedulingThread != null) {
-            log.error("Only one thread per Application is allowed. If you want to start a new one, stop the old one first")
+        if (config.scheduling.thread.name) {
+            schedulingThread.setName(config.scheduling.thread.name)
         } else {
-            log.info("creating UberSchedulingThread")
-            schedulingThread = new UberSchedulingThread(this)
-            if (config.scheduling.thread.name) {
-                schedulingThread.setName(config.scheduling.thread.name)
-            } else {
-                schedulingThread.setName("$hostName#UberSchedulingThread")
-            }
-            schedulingThread.start()
+            schedulingThread.setName("$hostName#UberSchedulingThread")
         }
+        schedulingThread.start()
     }
 
     def stopThread() {
@@ -81,5 +76,10 @@ class UberJobsSchedulingService extends AbstractUberJobsService {
         } catch (OptimisticLockingFailureException e) {
             log.info("it looks like another thread already handled $trigger.name, will do nothing")
         }
+    }
+
+    @Override
+    void afterPropertiesSet() throws Exception {
+        schedulingThread = new UberSchedulingThread(this)
     }
 }
