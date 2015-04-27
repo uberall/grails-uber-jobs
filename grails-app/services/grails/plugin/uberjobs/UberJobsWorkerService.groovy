@@ -137,7 +137,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             worker.persistenceHandler = new WorkerPersistenceHandler(persistenceInterceptor)
         }
 
-        def emptyQueueSleepTime = config.emptyQueueSleepTime ?: 1000
+        def emptyQueueSleepTime = config.workers.emptyQueueSleepTime ?: 1000
         log.info("using $emptyQueueSleepTime as sleep time")
         worker.emptyQueueSleepTime = emptyQueueSleepTime
 
