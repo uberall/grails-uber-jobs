@@ -117,8 +117,13 @@ Brief summary/description of the plugin.
         // AFTER SPRING CONTEXT IS INITIALIZED
         ctx.uberJobsJobService.init()
         ctx.uberJobsWorkerService.createWorkersFromConfig()
-        if(ctx.grailsApplication.config.grails.uberjobs.scheduling.thread.active)
-            ctx.uberJobsSchedulingService.startThread()
+        if (ctx.grailsApplication.config.grails.uberjobs.scheduling.thread.active) {
+            try {
+                ctx.uberJobsSchedulingService.startThread()
+            } catch(IllegalThreadStateException e) {
+                log.error("Scheduling thread could not be started", e)
+            }
+        }
     }
 
     def onChange = { event ->

@@ -8,10 +8,19 @@ import org.springframework.dao.OptimisticLockingFailureException
 @Transactional
 class UberJobsSchedulingService extends AbstractUberJobsService implements InitializingBean {
 
+    /**
+     * the actual thread in which all the work is done
+     */
     private static UberSchedulingThread schedulingThread
+
     def uberJobsJobService
 
-    def startThread() {
+    /**
+     * Start the scheduling thread of VM
+     * IllegalThreadStateException is thrown if thread was already started
+     * @return
+     */
+    def startThread() throws IllegalThreadStateException{
         if (config.scheduling.thread.name) {
             schedulingThread.setName(config.scheduling.thread.name)
         } else {
@@ -20,6 +29,10 @@ class UberJobsSchedulingService extends AbstractUberJobsService implements Initi
         schedulingThread.start()
     }
 
+    /**
+     * Stops the scheduling thread of this VM
+     * @return
+     */
     def stopThread() {
         if (schedulingThread != null) {
             log.info("Stopping UberSchedulingThread")
@@ -40,9 +53,13 @@ class UberJobsSchedulingService extends AbstractUberJobsService implements Initi
         }
     }
 
+    /**
+     * Finds all Triggers which next execution time is in the past and enqueues jobs for those triggers
+     * @return when this method should be called again aka the next time a trigger's next execution is in the past
+     */
     DateTime doPoll() {
         DateTime nearestNext = null
-        UberTriggerMeta.where { enabled }.list().each { UberTriggerMeta uberTriggerMeta ->
+        UberTriggerMeta.where { enabled == true }.list().each { UberTriggerMeta uberTriggerMeta ->
             if (!uberTriggerMeta.estimatedNextExecution || uberTriggerMeta.estimatedNextExecution.isBefore(DateTime.now())) {
                 doExecute(uberTriggerMeta)
             }
@@ -62,7 +79,8 @@ class UberJobsSchedulingService extends AbstractUberJobsService implements Initi
     }
 
     /**
-     * return the next calculated next execution time of the given trigger
+     * "triggers" the given trigger ->
+     * sets its last fire time and enqueues the job that will do all the work
      * @param trigger
      * @return
      */

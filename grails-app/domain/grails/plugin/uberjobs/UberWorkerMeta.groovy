@@ -68,22 +68,22 @@ class UberWorkerMeta implements UberApiResponseObject {
         /**
          * Worker is currently idle
          */
-                IDLE,
+        IDLE,
 
         /**
          * Worker is currently working
          */
-                WORKING,
+        WORKING,
 
         /**
          * Worker is currently paused
          */
-                PAUSED,
+        PAUSED,
 
         /**
          * Worker has been stopped
          */
-                STOPPED
+        STOPPED
     }
 
     @Override

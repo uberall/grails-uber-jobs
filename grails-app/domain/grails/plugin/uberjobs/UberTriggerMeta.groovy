@@ -77,6 +77,10 @@ class UberTriggerMeta implements UberApiResponseObject {
         updateEstimatedNextExecution()
     }
 
+    def afterLoad(){
+        arguments = JSON.parse(argumentsJSON) as List
+    }
+
     void updateEstimatedNextExecution() {
         estimatedNextExecution = new CronExpression(cronExpression).getNextValidTimeAfter(DateTime.now())
     }
