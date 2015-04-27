@@ -115,15 +115,24 @@ Brief summary/description of the plugin.
 
     def doWithApplicationContext = { ctx ->
         // AFTER SPRING CONTEXT IS INITIALIZED
+
+        // setup jobs, triggers and queues
         ctx.uberJobsJobService.init()
+
+        // start workers
         ctx.uberJobsWorkerService.createWorkersFromConfig()
+
+        // start scheduling (trigger) thread
         if (ctx.grailsApplication.config.grails.uberjobs.scheduling.thread.active) {
             try {
                 ctx.uberJobsSchedulingService.startThread()
-            } catch(IllegalThreadStateException e) {
+            } catch (IllegalThreadStateException e) {
                 log.error("Scheduling thread could not be started", e)
             }
         }
+
+        // start signaling thread
+        ctx.uberJobsSignalService.startThread()
     }
 
     def onChange = { event ->
@@ -135,10 +144,14 @@ Brief summary/description of the plugin.
 
     def onShutdown = { event ->
         def configuration = application.config.grails.uberjobs
+
         if (configuration.waitForWorkersOnShutdown)
             application.mainContext.uberJobsWorkerService.shutdownAllWorkers()
+
         if (configuration.scheduling.thread.active)
             application.mainContext.uberJobsSchedulingService.stopThread()
+
+        application.mainContext.uberJobsSignalService.stopThread()
     }
 
     private static boolean isPluginEnabled(def application) {

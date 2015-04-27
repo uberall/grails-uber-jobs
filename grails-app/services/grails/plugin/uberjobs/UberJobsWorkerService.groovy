@@ -9,7 +9,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
     def uberJobsQueueService
     PersistenceContextInterceptor persistenceInterceptor
 
-    private static final List WORKERS = []
+    static final List<UberWorker> WORKERS = []
 
     def createWorkersFromConfig() {
         def currentCount = UberWorkerMeta.countByHostname(hostName)
@@ -167,7 +167,9 @@ class UberJobsWorkerService extends AbstractUberJobsService {
      */
     UberSignal pauseWorker(UberWorkerMeta worker) {
         UberSignal pauseSignal = new UberSignal()
-        pauseSignal.receiver = worker.name
+        pauseSignal.receiver = worker.hostname
+        pauseSignal.arguments << [pool: worker.poolName]
+        pauseSignal.arguments << [index: worker.index]
         pauseSignal.value = UberSignal.Value.WORKER_PAUSE
         pauseSignal.save()
     }
@@ -178,10 +180,12 @@ class UberJobsWorkerService extends AbstractUberJobsService {
      * @param worker the worker that should resume its work
      */
     UberSignal resumeWorker(UberWorkerMeta worker) {
-        UberSignal pauseSignal = new UberSignal()
-        pauseSignal.receiver = worker.name
-        pauseSignal.value = UberSignal.Value.WORKER_RESUME
-        pauseSignal.save()
+        UberSignal resumeSignal = new UberSignal()
+        resumeSignal.receiver = worker.hostname
+        resumeSignal.arguments << [pool: worker.poolName]
+        resumeSignal.arguments << [index: worker.index]
+        resumeSignal.value = UberSignal.Value.WORKER_RESUME
+        resumeSignal.save()
     }
 
     /**
@@ -190,10 +194,18 @@ class UberJobsWorkerService extends AbstractUberJobsService {
      * @param worker the worker to send to STOPPED state
      */
     UberSignal stopWorker(UberWorkerMeta worker) {
-        UberSignal pauseSignal = new UberSignal()
-        pauseSignal.receiver = worker.name
-        pauseSignal.value = UberSignal.Value.WORKER_STOP
-        pauseSignal.save()
+        UberSignal stopSignal = new UberSignal()
+        stopSignal.receiver = worker.hostname
+        stopSignal.arguments << [pool: worker.poolName]
+        stopSignal.arguments << [index: worker.index]
+        stopSignal.value = UberSignal.Value.WORKER_STOP
+        stopSignal.save()
+    }
+
+    UberWorker getWorker(String name) {
+        WORKERS.find { worker ->
+            worker.name == name
+        }
     }
 
     private UberWorkerMeta createWorkerMeta(String poolName, int index, List<UberQueue> queues) {
@@ -203,4 +215,5 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         }
         workerMeta.save(failOnError: true)
     }
+
 }

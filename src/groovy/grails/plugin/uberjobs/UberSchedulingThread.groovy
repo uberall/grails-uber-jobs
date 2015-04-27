@@ -14,15 +14,16 @@ class UberSchedulingThread extends Thread {
         this.uberSchedulingService = uberSchedulingService
     }
 
-    @Override
     /**
      * Checks every second if the waitTill time is reached, if so executes the doPoll method of the underlying service, if not just sleeps for a second
      * this brings to fancy side effects:
      * a) we can gracefully stop the thread every second
      * b) the waitTill time could be changed from within the service, to make this thread execute the service (e.g. on dynamic trigger creation or execution)
      */
+    @Override
     void run() {
-        log.info("Starting")
+        log.info("spinning up scheduler thread")
+
         while (!isInterrupted()) {
             try {
                 if(DateTime.now().isAfter(waitTill)){

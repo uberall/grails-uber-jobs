@@ -16,6 +16,9 @@ grails {
             max = 20 // default max list size
             baseUrl = "http://localhost:8080/uberjobs/api" // if you use the uber-jobs-admin plugin, this setting is needed to determine the API url
         }
+        signal {
+            pollDelay = 1000 // how often should we check for signals (each x milliseconds)
+        }
         jobs {
             update = true // enable updating JobMeta on application startup
             cleanup = true // enable pruning JobMeta of Jobs that are not found in code anymore
@@ -29,6 +32,7 @@ grails {
             update = true // enable updating of WorkerMeta on application startup
             restart = true // enable starting from WorkerMeta that is not in config but in DB
             emptyQueueSleepTime = 2000 // time in milliseconds a worker should sleep if all of his queues are empty
+            pauseSleepTime = 5000 // time in milliseconds a worker should sleep if he is paused
             // generic worker pool
             genericPool {
                 workers = 3

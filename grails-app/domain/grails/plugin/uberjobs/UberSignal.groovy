@@ -8,7 +8,7 @@ import grails.converters.JSON
 class UberSignal {
 
     /**
-     * the object that should receive this signal (e.g. the name of a worker)
+     * the name of the host that should receive this signal
      */
     String receiver
 
@@ -18,14 +18,14 @@ class UberSignal {
     Value value
 
     /**
-     * an optional JSON blob that is used for passing arguments
+     * an optional JSON blob that is used for passing arguments (e.g. which worker to pause)
      */
     String argumentsJSON
 
     /**
      * Helper field to put and receive args, will be serialized to JSON in beforeValidate and load again in afterLoad
      */
-    transient List arguments = []
+    transient Map arguments = [:]
 
     enum Value {
         /**
@@ -55,11 +55,11 @@ class UberSignal {
     }
 
     void beforeValidate() {
-        argumentsJSON = ((arguments) as JSON).toString()
+        argumentsJSON = (arguments as JSON).toString()
     }
 
     void afterLoad() {
-        arguments = JSON.parse(argumentsJSON) as List
+        arguments = JSON.parse(argumentsJSON) as Map
     }
 
     /**
