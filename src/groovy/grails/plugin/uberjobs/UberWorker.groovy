@@ -146,6 +146,7 @@ class UberWorker implements Runnable {
         } catch (InterruptedException ignore) {
             if (!stopped) {
                 log.error("worker $name has been interrupted but has not been stopped!")
+                setWorkerStatus(UberWorkerMeta.Status.STOPPED)
             }
         } catch (Throwable t) {
             log.error("error in worker $name", t)
@@ -184,6 +185,7 @@ class UberWorker implements Runnable {
         } catch (InterruptedException ignore) {
             if (!stopped) {
                 log.error("worker $name has been interrupted but has not been stopped!")
+                setWorkerStatus(UberWorkerMeta.Status.STOPPED)
             }
         } catch (Throwable t) {
             log.error("error in worker $name", t)
