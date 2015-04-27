@@ -7,7 +7,6 @@ import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 class UberJobsWorkerService extends AbstractUberJobsService {
 
     def uberJobsQueueService
-    def uberJobsWorkerMetaService
     PersistenceContextInterceptor persistenceInterceptor
 
     private static final List WORKERS = []
@@ -80,7 +79,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
     UberWorker start(String poolName, int index, List<UberQueue> queues) {
         UberWorkerMeta workerMeta = UberWorkerMeta.findByPoolNameAndHostnameAndIndex(poolName, hostName, index)
         if (!workerMeta) {
-            workerMeta = uberJobsWorkerMetaService.create(poolName, index, queues)
+            workerMeta = createWorkerMeta(poolName, index, queues)
         } else if (config.workers.update) {
             // TODO: UPDATE
         }
@@ -158,4 +157,23 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         worker
     }
 
+    /**
+     * Pause a worker. Sends a signal to the specified worker that it should go to PAUSED state.
+     *
+     * @param worker the worker to send to PAUSED state
+     */
+    UberSignal pauseWorker(UberWorkerMeta worker) {
+        UberSignal pauseSignal = new UberSignal()
+        pauseSignal.key = worker.name
+        pauseSignal.value = UberSignal.Value.WORKER_PAUSE
+        pauseSignal.save()
+    }
+
+    private UberWorkerMeta createWorkerMeta(String poolName, int index, List<UberQueue> queues) {
+        UberWorkerMeta workerMeta = new UberWorkerMeta(poolName: poolName, index: index, hostname: hostName, status:  UberWorkerMeta.Status.STARTING)
+        queues.each {
+            workerMeta.addToQueues(it)
+        }
+        workerMeta.save(failOnError: true)
+    }
 }

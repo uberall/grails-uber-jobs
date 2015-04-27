@@ -3,7 +3,6 @@ package grails.plugin.uberjobs
 class UberJobsWorkerMetaController extends AbstractUberJobsController {
 
     def uberJobsWorkerService
-    def uberJobsWorkerMetaService
 
     def list() {
         def list = UberWorkerMeta.createCriteria().list(params) {
