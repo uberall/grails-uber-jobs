@@ -33,6 +33,7 @@ grails {
             restart = true // enable starting from WorkerMeta that is not in config but in DB
             emptyQueueSleepTime = 2000 // time in milliseconds a worker should sleep if all of his queues are empty
             pauseSleepTime = 5000 // time in milliseconds a worker should sleep if he is paused
+            manualPoolName = "manualPool"
             // generic worker pool
             genericPool {
                 workers = 3
