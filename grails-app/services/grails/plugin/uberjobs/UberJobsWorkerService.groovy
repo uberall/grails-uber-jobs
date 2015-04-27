@@ -10,7 +10,6 @@ class UberJobsWorkerService extends AbstractUberJobsService {
     PersistenceContextInterceptor persistenceInterceptor
 
     private static final List WORKERS = []
-    private static final List UNPARSED_CONFIG_PARAMETERS = ['update', 'cleanup', 'restart', 'emptyQueueSleepTime']
 
     def createWorkersFromConfig() {
         def currentCount = UberWorkerMeta.countByHostname(hostName)
@@ -28,7 +27,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
 
         // iterate over workers configurations
         config.workers.each { String poolName, config ->
-            if (poolName in UNPARSED_CONFIG_PARAMETERS) {
+            if (!poolName.endsWith("Pool")) {
                 return
             }
             List queueNames
@@ -50,7 +49,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             }
             // start the appropiate amount of workers
             config.workers.times { int index ->
-                start(poolName, index, queues)
+                startWorker(poolName, index, queues)
             }
         }
     }
@@ -76,7 +75,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         }
     }
 
-    UberWorker start(String poolName, int index, List<UberQueue> queues) {
+    UberWorker startWorker(String poolName, int index, List<UberQueue> queues) {
         UberWorkerMeta workerMeta = UberWorkerMeta.findByPoolNameAndHostnameAndIndex(poolName, hostName, index)
         if (!workerMeta) {
             workerMeta = createWorkerMeta(poolName, index, queues)
@@ -137,8 +136,12 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         }
 
         def emptyQueueSleepTime = config.workers.emptyQueueSleepTime ?: 1000
-        log.info("using $emptyQueueSleepTime as sleep time")
+        log.info("using $emptyQueueSleepTime as empty queue sleep time")
         worker.emptyQueueSleepTime = emptyQueueSleepTime
+
+        def pauseSleepTime = config.workers.pauseSleepTime ?: 5000
+        log.info("using $pauseSleepTime as pause sleep time")
+        worker.pauseSleepTime = pauseSleepTime
 
         // enable monitoring if specified (not yet implemented)
 //        boolean monitoring = grailsApplication.config.grails.uberjobs.monitoring as boolean

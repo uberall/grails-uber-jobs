@@ -27,6 +27,7 @@ class UberWorker implements Runnable {
     protected Locale locale
     protected WorkerPersistenceHandler persistenceHandler
     protected long emptyQueueSleepTime = 2000 // 2 seconds
+    protected long pauseSleepTime = 5000 // 5 seconds
 
     /**
      * Creates a new UberWorker.
@@ -382,7 +383,7 @@ class UberWorker implements Runnable {
                 try {
                     // as long as we didn't receive a continue signal, we sleep
                     log.trace("worker is paused, sleeping")
-                    threadRef.sleep(emptyQueueSleepTime)
+                    threadRef.sleep(pauseSleepTime)
                 } catch (InterruptedException ignore) {
                     log.warn("Worker interrupted while pausing in checkSignals")
                 }

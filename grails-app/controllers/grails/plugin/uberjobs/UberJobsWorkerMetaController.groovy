@@ -45,7 +45,7 @@ class UberJobsWorkerMetaController extends AbstractUberJobsController {
             }
         }
         int newIndex = maxIndex != null ? maxIndex + 1 : 0
-        def workerMeta = uberJobsWorkerService.start(json.poolName, newIndex, queues)
+        def workerMeta = uberJobsWorkerService.startWorker(json.poolName, newIndex, queues)
 
         renderResponse([worker: workerMeta])
     }
