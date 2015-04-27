@@ -19,7 +19,7 @@ class UberJobsJobMetaService extends AbstractUberJobsService {
             def locked = UberJobMeta.lock(jobMeta.id)
             if (updateProperties.enabled != null)
                 locked.enabled = updateProperties.enabled
-            if (updateProperties.minDely != null)
+            if (updateProperties.minDelay != null)
                 locked.minDelay = updateProperties.minDelay
             if (updateProperties.singletonJob != null)
                 locked.singletonJob = updateProperties.singletonJob
