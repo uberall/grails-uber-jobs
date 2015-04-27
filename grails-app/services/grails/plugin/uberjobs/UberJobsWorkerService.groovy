@@ -153,7 +153,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         WORKERS.add(worker)
 
         // start the actual worker thread
-        new Thread(worker, worker.getName()).start()
+        new Thread(worker, workerMeta.getName()).start()
 
         worker
     }

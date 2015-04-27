@@ -100,4 +100,14 @@ class UberWorkerMeta implements UberApiResponseObject {
         ]
     }
 
+    /**
+     * Returns the name of this worker.
+     * The name is composed of the hostname, the poolName and the index in that pool separated by a hash (#).
+     *
+     * @return the name of this worker
+     */
+    String getName() {
+        return "$hostname#$poolName#$index"
+    }
+
 }

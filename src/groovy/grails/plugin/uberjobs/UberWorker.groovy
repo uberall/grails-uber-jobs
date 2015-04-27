@@ -22,7 +22,6 @@ class UberWorker implements Runnable {
     protected UberJobThrowableHandler jobThrowableHandler
     protected LinkedList<UberQueue> queueNames = new LinkedList<UberQueue>()
     protected Thread threadRef
-    protected String name
     protected UberWorkerMeta workerMeta
     protected PollMode pollMode
     protected Locale locale
@@ -278,14 +277,8 @@ class UberWorker implements Runnable {
         failure.save()
     }
 
-    /**
-     * Returns the name of this worker.
-     * The name is composed of the hostname, the poolName and the index in that pool separated by a hash (#).
-     *
-     * @return the name of this worker
-     */
     String getName() {
-        return "$workerMeta.hostname#$workerMeta.poolName#$workerMeta.index"
+        return workerMeta.name
     }
 
     /**
