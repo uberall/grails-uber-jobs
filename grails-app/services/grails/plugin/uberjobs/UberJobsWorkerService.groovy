@@ -28,7 +28,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
 
         // iterate over workers configurations
         config.workers.each { String poolName, config ->
-            if (poolName in ['update', 'cleanup', 'restart']) {
+            if (poolName in ['update', 'cleanup', 'restart', 'emptyQueueSleepTime']) {
                 return
             }
             List queueNames
