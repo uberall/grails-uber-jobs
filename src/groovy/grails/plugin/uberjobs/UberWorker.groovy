@@ -36,11 +36,13 @@ class UberWorker implements Runnable {
      *
      * @param workerMeta the UberWorkerMeta that holds information about this worker
      * @param pollMode the poll mode this worker should use to poll the queues
+     * @param persistenceHandler the persistence handler that will bind a session to this worker on each job that is processed
      * @throws IllegalArgumentException if queues is null
      */
-    public UberWorker(UberWorkerMeta workerMeta, PollMode pollMode) {
+    public UberWorker(UberWorkerMeta workerMeta, PollMode pollMode, WorkerPersistenceHandler persistenceHandler) {
         this.workerMeta = workerMeta
         this.pollMode = pollMode
+        this.persistenceHandler = persistenceHandler
         workerMeta.status = UberWorkerMeta.Status.STARTING
         setQueues(workerMeta.queues)
     }
@@ -128,7 +130,7 @@ class UberWorker implements Runnable {
                         // Might have been waiting in poll()/checkSignals() for a while
                         if (idle) {
                             try {
-                                persistenceHandler?.bindSession()
+                                persistenceHandler.bindSession()
                                 UberJob job = pop(curQueue)
 
                                 if (job) {
@@ -136,7 +138,7 @@ class UberWorker implements Runnable {
                                     worked = true
                                 }
                             } finally {
-                                persistenceHandler?.unbindSession()
+                                persistenceHandler.unbindSession()
                             }
                         }
                     }
@@ -173,7 +175,7 @@ class UberWorker implements Runnable {
 
                 // Might have been waiting in poll()/checkSignals() for a while, so check the state again
                 if (idle) {
-                    persistenceHandler?.bindSession()
+                    persistenceHandler.bindSession()
                     UberJob job = pop(curQueue)
 
                     try {
@@ -187,7 +189,7 @@ class UberWorker implements Runnable {
                             Thread.sleep(emptyQueueSleepTime)
                         }
                     } finally {
-                        persistenceHandler?.unbindSession()
+                        persistenceHandler.unbindSession()
                     }
                 }
             }

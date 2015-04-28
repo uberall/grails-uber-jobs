@@ -101,16 +101,19 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             log.info("no pollMode specified, using $pollMode")
         }
 
+        // create persistence handler
+        WorkerPersistenceHandler persistenceHandler = new WorkerPersistenceHandler(persistenceInterceptor)
+
         // use custom worker class if specified
         UberWorker worker
         def customWorkerClass = config.worker
         if (customWorkerClass && customWorkerClass in UberWorker) {
             log.info("using ${customWorkerClass.class} as worker")
-            worker = customWorkerClass.newInstance(workerMeta, pollMode)
+            worker = customWorkerClass.newInstance(workerMeta, pollMode, persistenceHandler)
         } else {
             if (customWorkerClass)
                 log.warn('The specified custom worker class does not extend UberWorker. Ignoring it')
-            worker = new UberWorker(workerMeta, pollMode)
+            worker = new UberWorker(workerMeta, pollMode, persistenceHandler)
         }
 
         // add custom job throwable handler if specified
@@ -128,9 +131,6 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             worker.locale = locale
             log.info("using ${locale} as locale")
         }
-
-        // enable persistence
-        worker.persistenceHandler = new WorkerPersistenceHandler(persistenceInterceptor)
 
         def emptyQueueSleepTime = config.workers.emptyQueueSleepTime ?: 1000
         log.info("using $emptyQueueSleepTime as empty queue sleep time")

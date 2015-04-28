@@ -90,7 +90,6 @@ Brief summary/description of the plugin.
                 }
             }
         }
-
     }
 
     def configureJobBeans = { GrailsUberJobClass jobClass ->
@@ -127,7 +126,7 @@ Brief summary/description of the plugin.
             ctx.uberJobsSchedulingService.startThread()
         }
 
-        // start signaling thread
+        // start signal thread
         ctx.uberJobsSignalService.startThread()
     }
 
@@ -141,16 +140,20 @@ Brief summary/description of the plugin.
     def onShutdown = { event ->
         def configuration = application.config.grails.uberjobs
 
+        // stop workers
         if (configuration.waitForWorkersOnShutdown)
             application.mainContext.uberJobsWorkerService.shutdownAllWorkers()
 
+        // stop scheduling thread
         if (configuration.scheduling.thread.active)
             application.mainContext.uberJobsSchedulingService.stopThread()
 
+        // stop signal thread
         application.mainContext.uberJobsSignalService.stopThread()
     }
 
     private static boolean isPluginEnabled(def application) {
         application.config.grails.uberjobs.enabled ?: false
     }
+
 }
