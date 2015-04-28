@@ -122,13 +122,9 @@ Brief summary/description of the plugin.
         // start workers
         ctx.uberJobsWorkerService.createWorkersFromConfig()
 
-        // start scheduling (trigger) thread
+        // start scheduling thread
         if (ctx.grailsApplication.config.grails.uberjobs.scheduling.thread.active) {
-            try {
-                ctx.uberJobsSchedulingService.startThread()
-            } catch (IllegalThreadStateException e) {
-                log.error("Scheduling thread could not be started", e)
-            }
+            ctx.uberJobsSchedulingService.startThread()
         }
 
         // start signaling thread

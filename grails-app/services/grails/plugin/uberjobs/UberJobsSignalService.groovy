@@ -18,7 +18,8 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
      * IllegalThreadStateException is thrown if thread was already started
      * @return
      */
-    def startThread() throws IllegalThreadStateException {
+    def startThread() {
+        log.info("Starting signal thread with poll delay $pollDelay")
         signalThread.setName("$hostName#UberSignalThread")
         signalThread.start()
     }
@@ -31,6 +32,8 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
     }
 
     def handleSignal(UberSignal signal) {
+        log.debug("handling signal: $signal.value (args: $signal.arguments)")
+
         switch (signal.value) {
             case UberSignal.Value.WORKER_PAUSE:
                 emitPauseSignal(signal)
@@ -63,7 +66,6 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
         if (!signal) return
 
         try {
-            log.debug("handling signal: $signal.value (args: $signal.arguments)")
             handleSignal(signal)
         } catch (Throwable t) {
             log.error("error while handling signal", t)
@@ -122,7 +124,7 @@ class UberJobsSignalService extends AbstractUberJobsService implements Initializ
         signalThread = new UberSignalThread(this, pollDelay)
     }
 
-    private getPollDelay() {
+    private int getPollDelay() {
         config.signal.pollDelay ?: 1000
     }
 
