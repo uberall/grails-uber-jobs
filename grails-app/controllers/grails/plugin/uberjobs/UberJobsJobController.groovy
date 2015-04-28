@@ -2,17 +2,23 @@ package grails.plugin.uberjobs
 
 class UberJobsJobController extends AbstractUberJobsController {
 
-    static allowedMethods = [list: 'GET', get: 'GET', enqueue: 'POST', delete: 'DELETE', update: 'PUT']
+    static allowedMethods = [list: 'GET', get: 'GET', failure: 'GET', enqueue: 'POST', delete: 'DELETE', update: 'PUT']
+
+
+    def get(){
+        withDomainObject(UberJob){
+            renderResponse([job: it])
+        }
+    }
 
     def list() {
         List statuses
         if (params.status) {
-                statuses = [UberJob.Status.valueOf(params.status.toString())]
+            statuses = [UberJob.Status.valueOf(params.status.toString())]
 
         } else if (params.getList("status[]")) {
             statuses = params.getList("status[]").collect { UberJob.Status.valueOf(it.toString()) }
-        }
-        else {
+        } else {
             statuses = [UberJob.Status.OPEN] // only show OPEN by default
         }
         def jobs = UberJob.createCriteria().list(params) {
@@ -33,7 +39,7 @@ class UberJobsJobController extends AbstractUberJobsController {
 
         // we double check queue as we dont want empty string to be used as queuenames
         String queue = null
-        if(json.queue)
+        if (json.queue)
             queue = json.queue as String
 
         def result = uberJobsJobService.enqueue(json.job.toString(), json.args as List, queue)
@@ -47,5 +53,15 @@ class UberJobsJobController extends AbstractUberJobsController {
 
     def update() {
         //TODO: implement me!
+    }
+
+    def failure() {
+        withDomainObject(UberJob) { UberJob uberJob ->
+            if (!uberJob.failure) {
+                renderNotFound()
+            } else {
+                renderResponse([failure: uberJob.failure])
+            }
+        }
     }
 }

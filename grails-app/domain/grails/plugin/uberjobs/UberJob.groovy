@@ -107,7 +107,8 @@ class UberJob implements UberApiResponseObject {
                 doAt       : doAt,
                 started    : started,
                 done       : done,
-                dateCreated: dateCreated
+                failure    : failure?.id,
+                dateCreated: dateCreated,
         ]
     }
 

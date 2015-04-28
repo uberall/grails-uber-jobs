@@ -4,6 +4,7 @@ class UberJobsUrlMappings {
 
         "/uberjobs/api/jobs"(controller: 'uberJobsJob', action: [GET: 'list', POST: 'enqueue'], parseRequest: true)
         "/uberjobs/api/jobs/$id"(controller: 'uberJobsJob', action: [GET: 'get', DELETE: 'delete', PUT: 'update'], parseRequest: true)
+        "/uberjobs/api/jobs/$id/failure"(controller: 'uberJobsJob', action: [GET: 'failure'], parseRequest: true)
         "/uberjobs/api/jobmetas"(controller: 'uberJobsJobMeta', action: [GET: 'list'], parseRequest: true)
         "/uberjobs/api/jobmetas/$id"(controller: 'uberJobsJobMeta', action: [GET: 'get', PUT: 'update'], parseRequest: true)
         "/uberjobs/api/triggers"(controller: 'uberJobsTriggerMeta', action: [GET: 'list', POST: 'create'], parseRequest: true)

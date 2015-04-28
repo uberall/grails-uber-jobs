@@ -1,6 +1,6 @@
 package grails.plugin.uberjobs
 
-class UberJobFailure {
+class UberJobFailure implements UberApiResponseObject{
 
     /**
      * The exception class
@@ -24,5 +24,14 @@ class UberJobFailure {
     static belongsTo = [job: UberJob]
 
     static constraints = {
+    }
+
+    @Override
+    Map toResponseObject() {
+        [
+                exception: exception,
+                message: message,
+                stacktrace: stacktrace
+        ]
     }
 }
