@@ -129,11 +129,8 @@ class UberJobsWorkerService extends AbstractUberJobsService {
             log.info("using ${locale} as locale")
         }
 
-        // add persistence support if configured
-        if (config.persistenceEnabled) {
-            log.info("enabling persistence")
-            worker.persistenceHandler = new WorkerPersistenceHandler(persistenceInterceptor)
-        }
+        // enable persistence
+        worker.persistenceHandler = new WorkerPersistenceHandler(persistenceInterceptor)
 
         def emptyQueueSleepTime = config.workers.emptyQueueSleepTime ?: 1000
         log.info("using $emptyQueueSleepTime as empty queue sleep time")

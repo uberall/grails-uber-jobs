@@ -127,11 +127,16 @@ class UberWorker implements Runnable {
 
                         // Might have been waiting in poll()/checkSignals() for a while
                         if (idle) {
-                            UberJob job = pop(curQueue)
+                            try {
+                                persistenceHandler?.bindSession()
+                                UberJob job = pop(curQueue)
 
-                            if (job) {
-                                process(job, curQueue)
-                                worked = true
+                                if (job) {
+                                    process(job, curQueue)
+                                    worked = true
+                                }
+                            } finally {
+                                persistenceHandler?.unbindSession()
                             }
                         }
                     }
@@ -168,16 +173,21 @@ class UberWorker implements Runnable {
 
                 // Might have been waiting in poll()/checkSignals() for a while, so check the state again
                 if (idle) {
+                    persistenceHandler?.bindSession()
                     UberJob job = pop(curQueue)
 
-                    if (job) {
-                        process(job, curQueue)
-                        missCount = 0
-                    } else if (++missCount >= queueNames.size() && idle) {
-                        // Keeps worker from busy-spinning on empty queues
-                        missCount = 0
-                        log.trace("all queues empty, sleeping for $emptyQueueSleepTime")
-                        Thread.sleep(emptyQueueSleepTime)
+                    try {
+                        if (job) {
+                            process(job, curQueue)
+                            missCount = 0
+                        } else if (++missCount >= queueNames.size() && idle) {
+                            // Keeps worker from busy-spinning on empty queues
+                            missCount = 0
+                            log.trace("all queues empty, sleeping for $emptyQueueSleepTime")
+                            Thread.sleep(emptyQueueSleepTime)
+                        }
+                    } finally {
+                        persistenceHandler?.unbindSession()
                     }
                 }
             }
@@ -230,11 +240,7 @@ class UberWorker implements Runnable {
             setWorkerStatus(UberWorkerMeta.Status.WORKING)
 
             def instance = job.job.jobBean
-
-            persistenceHandler?.bindSession()
             instance.perform(* job.arguments)
-            persistenceHandler?.unbindSession()
-
             success(job)
         } catch (Throwable t) {
             failure(t, job, curQueue)
