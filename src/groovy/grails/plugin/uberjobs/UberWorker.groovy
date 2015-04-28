@@ -34,16 +34,15 @@ class UberWorker implements Runnable {
      * Creates a new UberWorker.
      * The worker will only listen to the supplied queues.
      *
-     * @param queues the list of queues to poll
      * @param workerMeta the UberWorkerMeta that holds information about this worker
      * @param pollMode the poll mode this worker should use to poll the queues
      * @throws IllegalArgumentException if queues is null
      */
-    public UberWorker(Collection<UberQueue> queues, UberWorkerMeta workerMeta, PollMode pollMode) {
-        setQueues(queues)
+    public UberWorker(UberWorkerMeta workerMeta, PollMode pollMode) {
         this.workerMeta = workerMeta
         this.pollMode = pollMode
         workerMeta.status = UberWorkerMeta.Status.STARTING
+        setQueues(workerMeta.queues)
     }
 
     /**

@@ -93,8 +93,7 @@ class UberJobsWorkerService extends AbstractUberJobsService {
      * @return the started worker
      */
     UberWorker doStartWorker(UberWorkerMeta workerMeta) {
-        def queues = workerMeta.queues
-        log.info "Starting worker processing queues: ${queues.name}"
+        log.info "Starting worker processing queues: ${workerMeta.queues.name}"
 
         PollMode pollMode = config.pollMode
         if (!pollMode) {
@@ -107,11 +106,11 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         def customWorkerClass = config.worker
         if (customWorkerClass && customWorkerClass in UberWorker) {
             log.info("using ${customWorkerClass.class} as worker")
-            worker = customWorkerClass.newInstance(queues)
+            worker = customWorkerClass.newInstance(workerMeta, pollMode)
         } else {
             if (customWorkerClass)
                 log.warn('The specified custom worker class does not extend UberWorker. Ignoring it')
-            worker = new UberWorker(queues, workerMeta, pollMode)
+            worker = new UberWorker(workerMeta, pollMode)
         }
 
         // add custom job throwable handler if specified
