@@ -137,14 +137,6 @@ class UberJobsWorkerService extends AbstractUberJobsService {
         log.info("using $pauseSleepTime as pause sleep time")
         worker.pauseSleepTime = pauseSleepTime
 
-        // enable monitoring if specified (not yet implemented)
-//        boolean monitoring = grailsApplication.config.grails.uberjobs.monitoring as boolean
-//        if (monitoring) {
-//            log.debug("Enabling Monitoring for all Jobs")
-//            def workerMonitorListener = new WorkerMonitorListener(this)
-//            worker.workerEventEmitter.addListener(workerMonitorListener, WorkerEvent.JOB_EXECUTE, WorkerEvent.JOB_SUCCESS, WorkerEvent.JOB_FAILURE)
-//        }
-
         // add the worker to the list of known workers
         WORKERS.add(worker)
 
