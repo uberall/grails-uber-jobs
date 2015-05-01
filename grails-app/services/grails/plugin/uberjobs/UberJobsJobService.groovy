@@ -31,12 +31,13 @@ class UberJobsJobService extends AbstractUberJobsService {
                 status: UberJob.Status.OPEN,
         )
         uberJob.arguments.addAll(arguments)
-        if(uberJob.validate()){
+        if (uberJob.validate()){
             uberJob.save()
-            log.debug("enqueued $job.simpleName in queue $queue")
-        }else {
+            log.debug("enqueued $job.simpleName in queue $uberQueue.name")
+        } else {
             log.error("UberJob could not be validated: $uberJob.errors.allErrors")
         }
+
         uberJob
     }
 
