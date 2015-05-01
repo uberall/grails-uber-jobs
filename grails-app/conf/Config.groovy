@@ -1,4 +1,5 @@
 import grails.plugin.uberjobs.PollMode
+import grails.plugin.uberjobs.test.DisabledJob
 
 // configuration for plugin testing - will not be included in the plugin zip
 
@@ -22,6 +23,7 @@ grails {
             update = true // enable updating JobMeta on application startup
             cleanup = true // enable pruning JobMeta of Jobs that are not found in code anymore
             requestContextLocale = Locale.GERMANY
+            disabled = [DisabledJob]
         }
         triggers {
             update = true // enable updating TriggerMeta on application startup

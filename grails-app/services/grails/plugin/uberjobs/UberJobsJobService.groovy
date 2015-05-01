@@ -89,10 +89,12 @@ class UberJobsJobService extends AbstractUberJobsService {
         log.debug("handling JobMeta for $job")
         UberJobMeta jobMeta = UberJobMeta.findByJob(name)
         if (!jobMeta) {
-            jobMeta = uberJobsJobMetaService.create(name, true, job.minDelay, job.singletonJob)
+            boolean enabled = config.jobs.disabled in List ? !config.jobs.disabled.contains(job.clazz) : true
+            jobMeta = uberJobsJobMetaService.create(name, enabled, job.minDelay, job.singletonJob)
             log.info("created JobMeta for $job")
         } else if (config.jobs.update) {
-            jobMeta = uberJobsJobMetaService.update(jobMeta, [enabled: true, minDelay: job.minDelay, singletonJob: job.singletonJob])
+            boolean enabled = config.jobs.disabled in List ? !config.jobs.disabled.contains(job.clazz) : true
+            jobMeta = uberJobsJobMetaService.update(jobMeta, [enabled: enabled, minDelay: job.minDelay, singletonJob: job.singletonJob])
             log.info("updated JobMeta for $job")
         }
 
