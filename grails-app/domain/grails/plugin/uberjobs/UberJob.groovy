@@ -65,6 +65,11 @@ class UberJob implements UberApiResponseObject {
     DateTime dateCreated
 
     /**
+     * The name of the worker that processed this job
+     */
+    String worker
+
+    /**
      * Helper field to put and receive args, will be serialized to JSON in beforeValidate and load again in afterLoad
      */
     transient List arguments = []
@@ -86,6 +91,7 @@ class UberJob implements UberApiResponseObject {
         started nullable: true
         done nullable: true
         failure nullable: true
+        worker nullable: true
     }
 
     static mapping = {

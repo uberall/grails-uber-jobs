@@ -251,6 +251,7 @@ class UberWorker implements Runnable {
             setWorkerStatus(UberWorkerMeta.Status.IDLE)
             job.done = DateTime.now()
             job.started = started
+            job.worker = name
             job.save()
         }
     }
