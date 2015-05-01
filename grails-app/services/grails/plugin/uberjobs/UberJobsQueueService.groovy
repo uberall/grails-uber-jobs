@@ -18,7 +18,15 @@ class UberJobsQueueService extends AbstractUberJobsService {
         new UberQueue(name: name, enabled: true).save(failOnError: true)
     }
 
-    def update(UberQueue uberQueue, boolean enabled) {
+    /**
+     * Set whether the given queue should be enabled or disabled.
+     * No worker will aquire jobs from this queue if it is disabled.
+     * The queue will be locked while its status is being updated.
+     *
+     * @param uberQueue the queue to enabled or disabled
+     * @param enabled true if the queue should be enabled, false if it shoud be disabled
+     */
+    void update(UberQueue uberQueue, boolean enabled) {
         UberQueue.withNewTransaction {
             def locked = UberQueue.lock(uberQueue.id)
             locked.enabled = enabled
@@ -26,15 +34,31 @@ class UberJobsQueueService extends AbstractUberJobsService {
         }
     }
 
-    def disable(UberQueue uberQueue) {
+    /**
+     * Disables the given queue. No worker will grab jobs from this queue.
+     *
+     * @param uberQueue the queue to disable
+     */
+    void disable(UberQueue uberQueue) {
         update(uberQueue, false)
     }
 
+    /**
+     * Enables the given queue. Workers will grab jobs from this queue.
+     *
+     * @param uberQueue the queue to enable
+     */
     def enabled(UberQueue uberQueue) {
         update(uberQueue, true)
     }
 
-    def clear(UberQueue uberQueue, DateTime until = DateTime.now()){
-        UberJob.where {queue == uberQueue && status == UberJob.Status.OPEN && doAt < until}.deleteAll()
+    /**
+     * Clears the specified queue of any OPEN jobs where the execution time is in the past.
+     *
+     * @param uberQueue the queue to clear jobs from
+     * @return the number of cleared jobs
+     */
+    int clear(UberQueue uberQueue){
+        UberJob.where { queue == uberQueue && status == UberJob.Status.OPEN && doAt < DateTime.now() }.deleteAll()
     }
 }
