@@ -41,12 +41,13 @@ class UberQueue implements UberApiResponseObject {
     @Override
     Map toResponseObject() {
         [
-                id         : id,
-                name       : name,
-                enabled    : enabled,
-                dateCreated: dateCreated,
-                lastUpdated: lastUpdated,
-                items      : UberJob.countByQueueAndStatus(this, UberJob.Status.OPEN)
+                id          : id,
+                name        : name,
+                enabled     : enabled,
+                dateCreated : dateCreated,
+                lastUpdated : lastUpdated,
+                items       : UberJob.countByQueueAndStatusAndDoAtLessThan(this, UberJob.Status.OPEN, DateTime.now()),
+                delayedItems: UberJob.countByQueueAndStatusAndDoAtNotLessThan(this, UberJob.Status.OPEN, DateTime.now())
         ]
     }
 }
