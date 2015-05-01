@@ -95,11 +95,8 @@ class UberJobsWorkerService extends AbstractUberJobsService {
     UberWorker doStartWorker(UberWorkerMeta workerMeta) {
         log.info "Starting worker processing queues: ${workerMeta.queues.name}"
 
-        PollMode pollMode = config.pollMode
-        if (!pollMode) {
-            pollMode = PollMode.ROUND_ROBIN
-            log.info("no pollMode specified, using $pollMode")
-        }
+        PollMode pollMode = config.pollMode ?: PollMode.ROUND_ROBIN
+        log.info("using pollMode $pollMode")
 
         // create persistence handler
         WorkerPersistenceHandler persistenceHandler = new WorkerPersistenceHandler(persistenceInterceptor)
