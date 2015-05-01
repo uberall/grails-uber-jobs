@@ -361,7 +361,7 @@ class UberWorker implements Runnable {
             }
         } catch (OptimisticLockingFailureException ignore) {
             log.debug("another worker already popped job $job.id, trying queue $queue.name again in a bit")
-            threadRef.sleep(RandomUtils.nextInt(1000))
+            threadRef.sleep(RandomUtils.nextInt(1000)+1000)
             return pop(queue)
         }
 
