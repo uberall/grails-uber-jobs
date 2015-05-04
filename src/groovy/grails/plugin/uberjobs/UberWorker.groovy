@@ -353,8 +353,20 @@ class UberWorker implements Runnable {
         log.trace("popping from queue $queue.name")
 
         try {
-            job = UberJob.findByStatusAndQueueAndDoAtLessThan(UberJob.Status.OPEN, queue, DateTime.now())
-            if (job && job.job.enabled && job.queue.enabled) {
+            def jobs = UberJob.createCriteria().list {
+                createAlias('queue', 'q')
+                createAlias('job', 'j')
+                eq('status', UberJob.Status.OPEN)
+                eq('queue', queue)
+                eq('q.enabled', true)
+                eq('j.enabled', true)
+                lt('doAt', DateTime.now())
+                maxResults 1
+            }
+
+            if (jobs) job = jobs.first()
+
+            if (job) {
                 job.status = UberJob.Status.WORKING
                 job.save(flush: true)
                 log.debug("popped job from queue $queue.name")
