@@ -251,7 +251,6 @@ class UberWorker implements Runnable {
             setWorkerStatus(UberWorkerMeta.Status.IDLE)
             job.done = DateTime.now()
             job.started = started
-            job.worker = name
             job.save()
         }
     }
@@ -368,6 +367,7 @@ class UberWorker implements Runnable {
 
             if (job) {
                 job.status = UberJob.Status.WORKING
+                job.worker = name
                 job.save(flush: true)
                 log.debug("popped job from queue $queue.name")
             }
