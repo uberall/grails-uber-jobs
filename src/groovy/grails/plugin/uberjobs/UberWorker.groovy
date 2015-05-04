@@ -248,10 +248,10 @@ class UberWorker implements Runnable {
             failure(t, job, curQueue)
         } finally {
             log.debug("processing job $job.id finished, worker is now IDLE")
-            setWorkerStatus(UberWorkerMeta.Status.IDLE)
             job.done = DateTime.now()
             job.started = started
             job.save()
+            setWorkerStatus(UberWorkerMeta.Status.IDLE)
         }
     }
 
